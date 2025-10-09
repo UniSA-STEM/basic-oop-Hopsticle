@@ -7,17 +7,30 @@ Username: <username>
 This is my own work as defined by the University's Academic Misconduct Policy.
 """
 
-class CryptToken:
-    def __init__(self):
+def load_assets(filename='Asset List'):
+    try:
+        with open(filename, 'r') as file:
+            return file.read().splitlines()
+    except FileNotFoundError:
+        print('No Assets Found.')
+        return []
 
-class Data_Spike:
-    def __init__(self):
+class CryptoToken:           #Used to buy Rig or remove Damage
+    def __repr__(self):
+        return 'CryptoToken'
 
-class Removable_Drive:
-    def __init__(self):
+class Data_Spike:            #Required to deal damage to another Rig
+    def __repr__(self):
+        return 'Data Spike'
 
-class Security_Chip:
-    def __init__(self):
+class Removable_Drive:       #Required to store and move Assets
+    def __repr__(self):
+        return 'Removable Drive'
 
-class Hardware_Patch:
-    def __init__(self):
+class Security_Chip:         #Required to Encrypt or Decrypt Hacker or Rig Inventory
+    def __repr__(self):
+        return 'Security Chip'
+
+class Hardware_Patch:        #Required to level up a Rig
+    def __repr__(self):
+        return 'Hardware Patch'
