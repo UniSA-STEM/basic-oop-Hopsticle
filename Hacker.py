@@ -23,9 +23,13 @@ def load_names(filename='Hacker Names'):
 names = load_names()
 
 class Hacker:
-    def __init__(self, name=random.choice(names), inventory=['CryptoToken','*'], trace_level=0):
+    def __init__(self, name=random.choice(names), inventory=None, trace_level=0):
         self.name = name
-        self.inventory = inventory
+
+        if inventory is None:
+            self.inventory = Inventory()
+        else:
+            self.inventory = inventory
         self.trace_level = trace_level
 
     def __str__(self):
@@ -34,10 +38,10 @@ class Hacker:
 
 class Inventory:
     def __init__(self):
-        self.inventory = [Asset.CryptoToken(),'']
+        self.items = [Items.CryptoToken(),'']
 
     def __str__(self):
-        return (f'Inventory: {self.inventory}')
+        return f'Inventory: {self.items}'
 
 #Scan Inventory
 # print(Inventory)

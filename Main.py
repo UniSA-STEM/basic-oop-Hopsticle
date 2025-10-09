@@ -1,6 +1,6 @@
 """
 File: main.py
-Description: <A brief description of this Python module.>
+Description: The module containing the main running of the project.
 Author: Joshua Cordner
 ID: corjy027
 Username: corjy027
@@ -21,7 +21,7 @@ def main():
     hacker_number = input('How many Hackers will there be? ')
     print()
     for _ in range(int(hacker_number)):
-        new_hacker = (Hacker.Hacker(name=random.choice(Hacker.names), inventory=Hacker.Inventory))
+        new_hacker = (Hacker.Hacker(name=random.choice(Hacker.names), inventory=Hacker.Inventory()))
         chosen_name = new_hacker.name
         Hacker.names.remove(chosen_name)
         all_hackers.append(new_hacker)
@@ -33,7 +33,7 @@ def main():
     print(f'Hackers added:\n')
     for hacker in all_hackers:
         print(hacker.name)
-    print(f'\nBy Default they start with One {Items.CryptoToken} and a Trace Level of {hacker.trace_level}')
+    print(f'\nBy Default they start with One {Items.CryptoToken()} and a Trace Level of {hacker.trace_level}')
 
 
 def battle():

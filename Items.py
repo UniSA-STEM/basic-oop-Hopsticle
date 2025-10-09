@@ -1,9 +1,9 @@
 """
 File: Asset.py
-Description: <A brief description of this Python module.>
-Author: <full name>
-ID: <student_id>
-Username: <username>
+Description: The Module that houses the usable items of the hackers.
+Author: Joshua Cordner
+ID: corjy027
+Username: corjy027
 This is my own work as defined by the University's Academic Misconduct Policy.
 """
 
@@ -20,7 +20,7 @@ items = load_items()
 
 
 class CryptoToken:  # Used to buy Rig or remove Damage
-    def __str__(self):
+    def __repr__(self):
         return 'CryptoToken'
 
 

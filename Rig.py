@@ -1,6 +1,6 @@
 """
 File: Rig.py
-Description: This module contains the characteristics and actions that can be performed using the Rig
+Description: This module contains the characteristics and actions that can be performed using the Rig.
 Author: Joshua Cordner
 ID: corjy027
 Username: corjy027
@@ -22,18 +22,19 @@ def load_assets(filename='Asset List'):
 items = load_assets()
 
 class Rig:
-    def __init__(self, name=None, storage=random.choice(items)*2, condition=None, damage=0, broken_status=None, level=None):
+    def __init__(self, name=None,damage=0, level=None):
         self.name = name
         self.damage = damage
-        self.broken_status = broken_status
-        self.storage = Storage
         self.level = level
-        self.condition = Condition
+
+        self.rig_storage = Storage(self.level)
+        self.rig_condition = Condition(self.damage)
+        self.rig_broken_status = Broken_Status(self.damage)
 
     def __str__(self):
-        return (f'Rig: {self.name} | Level: {self.level} | Damage Taken: {self.damage} '
-                f'| Condition: {self.condition}| Broken: {self.broken_status}'
-                f'\n{self.storage}')
+        return (f'Rig: {self.name} | Level: {self.level} | Damage Taken: {self.damage}'
+                f'| Condition: {self.rig_condition}| Broken: {self.rig_broken_status}'
+                f'\n{self.rig_storage}')
 
 
 class Storage:
@@ -51,34 +52,31 @@ class Storage:
 
 class Condition:
     def __init__(self, damage):
-        if self.damage >= 5:
+        if damage >= 5:
             self.condition = 'FUBAR'
-        if self.damage == 4:
+        elif damage == 4:
             self.condition = 'Blue Screening'
-        if self.damage == 3:
+        elif damage == 3:
             self.condition = ''
-        if self.damage == 2:
+        elif damage == 2:
             self.condition = 'OK'
-        if self.damage == 1:
+        elif damage == 1:
             self.condition = 'PSA 8'
-        if self.damage == 0:
+        elif damage == 0:
             self.condition = 'Gem Mint'
+        else:
+            self.condition = 'Unknown'
 
     def __str__(self):
         return f'{self.condition}'
 
 
-class BrokenStatus:
+class Broken_Status:
     def __init__(self, damage):
-        damage = self.damage
-        if self.damage >= 5:
+        if damage >= 5:
             self.broken_status = True
         else:
             self.broken_status = False
 
-
-# class Level:
-#     def __init__(self):
-#
-#     def __str__(self):
-#         return f'Level: {self.level}'
+    def __str__(self):
+        return str(self.broken_status)

@@ -1,9 +1,9 @@
 """
 File: Asset.py
-Description: <A brief description of this Python module.>
-Author: <full name>
-ID: <student_id>
-Username: <username>
+Description: The Market which holds all of the items for sale for use by hackers.
+Author: Joshua Cordner
+ID: corjy027
+Username: corjy027
 This is my own work as defined by the University's Academic Misconduct Policy.
 """
 
