@@ -7,7 +7,8 @@ Username: <username>
 This is my own work as defined by the University's Academic Misconduct Policy.
 """
 
-def load_assets(filename='Usable Assets'):
+
+def load_items(filename='Usable Items'):
     try:
         with open(filename, 'r') as file:
             return file.read().splitlines()
@@ -15,12 +16,18 @@ def load_assets(filename='Usable Assets'):
         print('Names file not found.')
         return []
 
-Usable_Assets = load_assets()
+items = load_items()
+
 
 class Black_Market:
-    def __init__(self, offerings=Usable_Assets):
+    def __init__(self, offerings=items):
         self.offerings = offerings
 
+    def __str__(self):
+        return f'Welcome to Black Market'
+        for index, offering in enumerate(items):
+            print(f'{index + 1}. {offering}')
+            print()
 
-print('Welcome to Black Market.',
-    *Usable_Assets, sep='\n')
+
+print(Black_Market)

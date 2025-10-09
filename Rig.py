@@ -7,10 +7,22 @@ Username: corjy027
 This is my own work as defined by the University's Academic Misconduct Policy.
 """
 
+
 # import Asset
+import random
+
+def load_assets(filename='Asset List'):
+    try:
+        with open(filename, 'r') as file:
+            return file.read().splitlines()
+    except FileNotFoundError:
+        print('No Assets Found.')
+        return []
+
+items = load_assets()
 
 class Rig:
-    def __init__(self, name=None, storage=['*','*'], condition=None, damage=0, broken_status=False, level=1):
+    def __init__(self, name=None, storage=random.choice(items)*2, condition=None, damage=0, broken_status=None, level=None):
         self.name = name
         self.damage = damage
         self.broken_status = broken_status
@@ -27,11 +39,15 @@ class Rig:
 class Storage:
     def __init__(self, level):
         if level == 1:
-            self.storage = ['*','*']
+            self.storage = ['*', '*']
         if level == 2:
-            self.storage = ['*','*','*','*']
+            self.storage = ['*', '*', '*', '*']
         else:
-            self.storage = ['*','*''*','*''*','*']
+            self.storage = ['*', '*', '*', '*', '*', '*']
+
+    def __repr__(self):
+        return f'Storage: {self.storage}'
+
 
 class Condition:
     def __init__(self, damage):
@@ -47,16 +63,22 @@ class Condition:
             self.condition = 'PSA 8'
         if self.damage == 0:
             self.condition = 'Gem Mint'
+
     def __str__(self):
         return f'{self.condition}'
+
 
 class BrokenStatus:
     def __init__(self, damage):
         damage = self.damage
         if self.damage >= 5:
             self.broken_status = True
+        else:
+            self.broken_status = False
+
+
+# class Level:
+#     def __init__(self):
 #
-#
-#
-# new_rig = Rig()
-# print(new_rig)
+#     def __str__(self):
+#         return f'Level: {self.level}'
