@@ -18,6 +18,7 @@ import Rig
 def main():
     all_hackers = []
 
+
     hacker_number = input('How many Hackers will there be? ')
     print()
     for _ in range(int(hacker_number)):
@@ -33,7 +34,7 @@ def main():
     print(f'Hackers added:\n')
     for hacker in all_hackers:
         print(hacker.name)
-    print(f'\nBy Default they start with One {Items.CryptoToken()} and a Trace Level of {hacker.trace_level}')
+    print(f'\nBy Default they start with One {Items.CryptoToken()} and a Trace Level of {Hacker.Trace_level()}')
 
 
 def battle():

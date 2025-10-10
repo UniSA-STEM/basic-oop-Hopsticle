@@ -22,7 +22,7 @@ def load_assets(filename='Asset List'):
 items = load_assets()
 
 class Rig:
-    def __init__(self, name=None,damage=0, level=None):
+    def __init__(self, name=None,damage=0, level=1):
         self.name = name
         self.damage = damage
         self.level = level
@@ -39,15 +39,18 @@ class Rig:
 
 class Storage:
     def __init__(self, level):
-        if level == 1:
-            self.storage = ['*', '*']
-        if level == 2:
-            self.storage = ['*', '*', '*', '*']
+        if level is None or level == 1:
+            self.rig_storage = ['*', '*']
+        elif level == 2:
+            self.rig_storage = ['*', '*', '*', '*']
+        elif level > 2:
+            self.rig_storage = ['*', '*', '*', '*', '*', '*']
         else:
-            self.storage = ['*', '*', '*', '*', '*', '*']
+            self.rig_storage = []
+
 
     def __repr__(self):
-        return f'Storage: {self.storage}'
+        return f'Storage: {self.rig_storage}'
 
 
 class Condition:
@@ -57,7 +60,7 @@ class Condition:
         elif damage == 4:
             self.condition = 'Blue Screening'
         elif damage == 3:
-            self.condition = ''
+            self.condition = 'Laggy'
         elif damage == 2:
             self.condition = 'OK'
         elif damage == 1:

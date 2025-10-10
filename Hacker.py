@@ -9,6 +9,8 @@ This is my own work as defined by the University's Academic Misconduct Policy.
 
 import random
 import Items
+
+
 # import Rig
 
 def load_names(filename='Hacker Names'):
@@ -22,28 +24,81 @@ def load_names(filename='Hacker Names'):
 
 names = load_names()
 
-class Hacker:
-    def __init__(self, name=random.choice(names), inventory=None, trace_level=0):
-        self.name = name
 
+class Trace_level:
+    def __init__(self, trace_level):
+        self.trace_level = trace_level
+        self.rig_level = 1
+        success_mult = 1.0
+        self.success_chance = 0.0
+
+        if self.trace_level > 0:
+            success_mult += self.trace_level * .3
+        if success_mult != 0:
+            self.success_chance = (1 / success_mult) * 100
+    def __str__(self):
+        return f'Trace Level {self.trace_level} | Action success rate {self.success_chance:.2f}%'
+
+
+class Hacker:
+    def __init__(self, trace_level_value=0, name=random.choice(names), inventory=None, ):
+        self.name = name
+        self.trace_info = Trace_level(trace_level_value)
         if inventory is None:
             self.inventory = Inventory()
         else:
             self.inventory = inventory
-        self.trace_level = trace_level
 
     def __str__(self):
-        return (f'Hacker: {self.name} | Trace Level {self.trace_level}'
+        return (f'Hacker: {self.name} | {self.trace_info}'
                 f'\n{self.inventory}')
+
 
 class Inventory:
     def __init__(self):
-        self.items = [Items.CryptoToken(),'']
+        self.items = [Items.CryptoToken(), '']
 
     def __str__(self):
         return f'Inventory: {self.items}'
 
-#Scan Inventory
+
+# class Actions:
+#     def __init__(self, inventory, items):
+#         self.inventory = inventory
+#         self.items = items
+#
+#     actions_list = ['Attack', 'Scan', '(En/De)Crypt', 'Upgrade/Repair', 'Buy', 'Extract']
+#
+#     action_scan = True
+#     if Items.Data_Spike in Hacker.name(Inventory):
+#         action_attack = True
+#
+#     if Items.CryptoToken in Hacker.name(Inventory):
+#         action_upgrade = True
+#     if Items.CryptoToken in Hacker.name(Inventory) and hacker_rig.name.damage > 0:
+#         action_repair = True
+#     if Items.Security_Chip in Hacker.name(Inventory) and:
+#         action_encrypt = True
+#     if Items.Security_Chip in Hacker.name(Inventory) and:
+#         action_decrypt = True
+#     action_buy = True
+#     if Items.Removable_Drive in Hacker.name(Inventory) and Hacker.name(Rig.name).Asset:
+#         action_extract = True
+#
+#     print(*actions_list, sep='\n')
+
+
+class Attack:
+    def __init__(self, items, damage, all_hackers):
+        if Items.Data_Spike in Inventory:
+            input(f'Which Rig will you attack?'
+                  f'\n {all_hackers.name}')
+
+
+# class Scan:
+#     def __init__(self):
+
+# Scan Inventory
 # print(Inventory)
 # #Store and retrieve
 # self.inventory = append.item
