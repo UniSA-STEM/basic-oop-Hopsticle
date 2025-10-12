@@ -17,7 +17,7 @@ import Rig
 
 def main():
     all_hackers = []
-
+    default_level_instance = Hacker.Trace_level()
 
     hacker_number = input('How many Hackers will there be? ')
     print()
@@ -34,7 +34,7 @@ def main():
     print(f'Hackers added:\n')
     for hacker in all_hackers:
         print(hacker.name)
-    print(f'\nBy Default they start with One {Items.CryptoToken()} and a Trace Level of {Hacker.Trace_level()}')
+    print(f'\nBy Default they start with One {Items.CryptoToken()} and a Trace Level of {default_level_instance.get_trace_level()}.')
 
 
 def battle():

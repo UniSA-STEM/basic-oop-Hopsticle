@@ -25,7 +25,7 @@ class CryptoToken:  # Used to buy Rig or remove Damage
 
 
 class Data_Spike:  # Required to deal damage to another Rig
-    def __str__(self):
+    def __repr__(self):
         return 'Data Spike'
 
 

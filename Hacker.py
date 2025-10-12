@@ -24,24 +24,8 @@ def load_names(filename='Hacker Names'):
 
 names = load_names()
 
-
-class Trace_level:
-    def __init__(self, trace_level):
-        self.trace_level = trace_level
-        self.rig_level = 1
-        success_mult = 1.0
-        self.success_chance = 0.0
-
-        if self.trace_level > 0:
-            success_mult += self.trace_level * .3
-        if success_mult != 0:
-            self.success_chance = (1 / success_mult) * 100
-    def __str__(self):
-        return f'Trace Level {self.trace_level} | Action success rate {self.success_chance:.2f}%'
-
-
 class Hacker:
-    def __init__(self, trace_level_value=0, name=random.choice(names), inventory=None, ):
+    def __init__(self, trace_level_value = 0, name=random.choice(names), inventory=None, ):
         self.name = name
         self.trace_info = Trace_level(trace_level_value)
         if inventory is None:
@@ -52,6 +36,37 @@ class Hacker:
     def __str__(self):
         return (f'Hacker: {self.name} | {self.trace_info}'
                 f'\n{self.inventory}')
+
+
+class Trace_level:
+    def __init__(self, trace_level=0):
+        self.trace_level = trace_level
+        self.rig_level = 0
+        self.set_success_chance()
+
+    def set_trace_level(self, trace_level):
+        self.trace_level = trace_level
+        self.set_success_chance()
+
+    def get_trace_level(self):
+        return self.trace_level
+
+    def set_success_chance(self):
+        success_mult = 1.0
+
+        if self.trace_level > 0:
+            success_mult += self.trace_level * .3
+
+        if success_mult != 0:
+            self.success_chance = (1 / success_mult) * 100
+        else:
+            self.success_chance = 0.0
+
+    def get_success_chance(self):
+        return self.success_chance
+
+    def __repr__(self):
+        return f'Trace Level {self.trace_level} | Action success rate {self.get_success_chance():.2f}%'
 
 
 class Inventory:

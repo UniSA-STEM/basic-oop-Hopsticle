@@ -11,6 +11,9 @@ This is my own work as defined by the University's Academic Misconduct Policy.
 # import Asset
 import random
 
+import Items
+
+
 def load_assets(filename='Asset List'):
     try:
         with open(filename, 'r') as file:
@@ -39,15 +42,16 @@ class Rig:
 
 class Storage:
     def __init__(self, level):
-        if level is None or level == 1:
-            self.rig_storage = ['*', '*']
-        elif level == 2:
-            self.rig_storage = ['*', '*', '*', '*']
-        elif level > 2:
-            self.rig_storage = ['*', '*', '*', '*', '*', '*']
+        if level == 1:
+            self.rig_storage = ['*', '*', '*', '*', '*', '*', '*', '*']
         else:
             self.rig_storage = []
 
+    def set_default_rig_storage(self, level):
+        self.default_rig_storage = [Items.Data_Spike(), Items.Data_Spike(), Items.Removable_Drive(), '*', '*', '*']
+
+    def get_default_rig_condition(self):
+        return self.default_rig_storage
 
     def __repr__(self):
         return f'Storage: {self.rig_storage}'
