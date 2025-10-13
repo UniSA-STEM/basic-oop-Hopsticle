@@ -104,8 +104,38 @@ class Scan():
     def __init__(self, all_hackers):
         return(all_hackers.name)
 
+class Decrypt:
+    def __init__(self):
+        if Items.Security_Chip in Inventory:
+            Inventory.items.remove(Items.Security_Chip)
+            for items in inventory with Items.ItemTally() Encrypted = True
+                Encrypted = False
 
+class Encrypt:
+    def __init__(self):
+        if Items.Security_Chip in Inventory:
+            Inventory.items.remove(Items.Security_Chip)
+            for items in inventory with Items.ItemTally() Encrypted = False
+            Encrypted = True
 
+class Upgrade:
+    def __init__(self, all_hackers):
+        if self.rig.level >= 3:
+            print('You cannot upgrade further')
+        else:
+            self.rig.level = self.rig.level + 1
+
+class repair:
+    def __init__(self, all_hackers):
+        if self.rig.damage_taken == 0:
+            print(f'You cannot use this item')
+
+class Extract:
+    def __init__(self):
+        for items in Rig.Storage:
+            if ItemTally() encrypter = False
+            items.remove(self.Rig.storage)
+            items.append(Inventory)
 
 #     if Items.CryptoToken in Hacker.name(Inventory):
 #         action_upgrade = True
