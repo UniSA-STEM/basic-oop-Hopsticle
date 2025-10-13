@@ -30,31 +30,40 @@ class Rig:
         self.damage = damage
         self.level = level
 
-        self.rig_storage = Storage(self.level)
+        self.rig_storage_items = []
+
+        self.set_default_rig_storage()
+        self.rig_storage_capacity = Storage(self.level)
         self.rig_condition = Condition(self.damage)
         self.rig_broken_status = Broken_Status(self.damage)
+
+    def set_default_rig_storage(self):
+        self.rig_storage_items = [Items.Data_Spike(), Items.Data_Spike(), Items.Removable_Drive(), '*', '*']
+
+    def get_current_rig_storage(self):
+        return self.rig_storage_items
 
     def __str__(self):
         return (f'Rig: {self.name} | Level: {self.level} | Damage Taken: {self.damage}'
                 f'| Condition: {self.rig_condition}| Broken: {self.rig_broken_status}'
-                f'\n{self.rig_storage}')
-
+                f'\n{self.get_current_rig_storage()}')
 
 class Storage:
     def __init__(self, level):
         if level == 1:
-            self.rig_storage = ['*', '*', '*', '*', '*', '*', '*', '*']
+            self.max_capacity = 5
+        elif level == 2:
+            self.max_capacity = 7
+        elif level == 3:
+            self.max_capacity = 9
         else:
-            self.rig_storage = []
+            self.max_capacity = 0
 
-    def set_default_rig_storage(self, level):
-        self.default_rig_storage = [Items.Data_Spike(), Items.Data_Spike(), Items.Removable_Drive(), '*', '*', '*']
-
-    def get_default_rig_condition(self):
-        return self.default_rig_storage
+    def get_max_capacity(self, level):
+        return self.max_capacity
 
     def __repr__(self):
-        return f'Storage: {self.rig_storage}'
+        return f'Capacity: {self.get_max_capacity()} slots'
 
 
 class Condition:

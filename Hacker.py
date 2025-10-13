@@ -9,9 +9,9 @@ This is my own work as defined by the University's Academic Misconduct Policy.
 
 import random
 import Items
+import Rig
+from Items import Data_Spike
 
-
-# import Rig
 
 def load_names(filename='Hacker Names'):
     try:
@@ -25,9 +25,11 @@ def load_names(filename='Hacker Names'):
 names = load_names()
 
 class Hacker:
-    def __init__(self, trace_level_value = 0, name=random.choice(names), inventory=None, ):
+    def __init__(self, name=random.choice(names),trace_level_value = 0, inventory=None, ):
         self.name = name
         self.trace_info = Trace_level(trace_level_value)
+        self.rig = Rig.Rig(name=self.name)
+
         if inventory is None:
             self.inventory = Inventory()
         else:
@@ -35,7 +37,8 @@ class Hacker:
 
     def __str__(self):
         return (f'Hacker: {self.name} | {self.trace_info}'
-                f'\n{self.inventory}')
+                f'\n{self.inventory}'
+                f'\n{self.rig}')
 
 
 class Trace_level:
@@ -71,23 +74,39 @@ class Trace_level:
 
 class Inventory:
     def __init__(self):
-        self.items = [Items.CryptoToken(), '']
+        self.items = [Items.CryptoToken()]
 
     def __str__(self):
         return f'Inventory: {self.items}'
 
 
-# class Actions:
-#     def __init__(self, inventory, items):
-#         self.inventory = inventory
-#         self.items = items
-#
-#     actions_list = ['Attack', 'Scan', '(En/De)Crypt', 'Upgrade/Repair', 'Buy', 'Extract']
-#
-#     action_scan = True
-#     if Items.Data_Spike in Hacker.name(Inventory):
-#         action_attack = True
-#
+class Actions:
+    def __init__(self, inventory, items):
+        self.inventory = inventory
+        self.items = items
+        self.actions_list = ['Attack', 'Scan', '(En/De)Crypt', 'Upgrade/Repair', 'Buy', 'Extract']
+
+    def get_list_actions(self):
+        return(f'Available Actions: {(self.actions_list)}')
+
+
+
+class Attack:
+    def __init__(self, items, damage, all_hackers):
+        if Items.Data_Spike in Inventory:
+            input(f'Which Rig will you attack?'
+                f'\n {all_hackers.name}')
+            for rig in all_hackers:
+                Inventory(self.items).remove(Data_Spike)
+
+
+class Scan():
+    def __init__(self, all_hackers):
+        return(all_hackers.name)
+
+
+
+
 #     if Items.CryptoToken in Hacker.name(Inventory):
 #         action_upgrade = True
 #     if Items.CryptoToken in Hacker.name(Inventory) and hacker_rig.name.damage > 0:
@@ -99,16 +118,9 @@ class Inventory:
 #     action_buy = True
 #     if Items.Removable_Drive in Hacker.name(Inventory) and Hacker.name(Rig.name).Asset:
 #         action_extract = True
-#
-#     print(*actions_list, sep='\n')
 
-
-class Attack:
-    def __init__(self, items, damage, all_hackers):
-        if Items.Data_Spike in Inventory:
-            input(f'Which Rig will you attack?'
-                  f'\n {all_hackers.name}')
-
+# go = Actions.get_list_actions
+# print(go)
 
 # class Scan:
 #     def __init__(self):
@@ -117,8 +129,6 @@ class Attack:
 # print(Inventory)
 # #Store and retrieve
 # self.inventory = append.item
-# #Attack - Requires Data Spike
-# Data Spike - Target - Minus from Inventory
 # #Extract Asset - Requires Removable Drive
 # Check Items for Encrypted - Extract Those
 # #Encrypt - Requires Security Chip in inventory
