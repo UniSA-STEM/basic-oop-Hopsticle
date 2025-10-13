@@ -37,24 +37,56 @@ def main():
         print(hacker.name)
 
     print(
-        f'\nBy Default they start with One {Items.CryptoToken()} and a Trace Level of {default_level_instance.get_trace_level()}.')
+        f'\n**By Default they start with One {Items.CryptoToken()} and a Trace Level of {default_level_instance.get_trace_level()}**')
     print()
 
-    manager = Turn_Manager(all_hackers)
 
-    manager.start_game()
+class GameManager():
+    def __init__(self, all_hackers):
+        self.all_hackers = all_hackers
+        self.num_hackers = len(self.all_hackers)
+        self.turn = 0
+        self.current_hacker = None
+        self.game_running = True
 
-    while game == 1:
+    def get_current_hacker(self):
+        self.current_hacker = self.all_hackers[self.turn % self.num_hackers]
+        return self.current_hacker
+
+    def next_turn(self):
+        self.turn += 1
+
+    def start_game(self):
+
+        while self.game_running:
+
+            active_hacker = self.get_current_hacker()
+
 
         def menu(current_hacker):
             print('--Menu--'
                   '\n1. Actions'
-                  '\n2. Scan'
+                  '\n2. Items'
+                  '\n3. Hackers'
                   '\n10. Exit')
             menu_choice = int(input('What action will you take? '))
             if menu_choice == 1:
                 actions_menu()
             if menu_choice == 2:
+
+                print(Items.load_items())
+                item_input = input('Which item would you like information on?')
+
+                try:
+                    ItemClass = getattr(Items, item_input)
+
+                    item_instance = ItemClass()
+                    holder = Items.ItemTally(
+                        name=item_instance,
+                        description=item_instance.description,
+                        encrypted=False)
+
+            if menu_choice == 3:
                 print(all_hackers)
 
         def actions_menu():
@@ -70,6 +102,7 @@ def main():
 
         def battle():
             turns = int(input('How many Days will you simulate? '))
+
 
 
 if __name__ == '__main__':
