@@ -85,9 +85,10 @@ class GameManager():
                         name=item_instance,
                         description=item_instance.description,
                         encrypted=False)
-
-            if menu_choice == 3:
-                print(all_hackers)
+                except:
+                    pass
+            # if menu_choice == 3:
+            #     print(all_hackers)
 
         def actions_menu():
             actions_instance = Hacker.Actions('','')

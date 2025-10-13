@@ -32,25 +32,25 @@ class CryptoToken:  # Used to buy Rig or remove Damage
     def __repr__(self):
         return 'CryptoToken'
 
-class Data_Spike:  # Required to deal damage to another Rig
+class DataSpike:  # Required to deal damage to another Rig
     def __init__(self):
         self.description = 'Data Spike is used to deal one instance of Damage to a Rig'
     def __repr__(self):
         return 'Data Spike'
 
-class Removable_Drive:  # Required to store and move Assets
+class RemovableDrive:  # Required to store and move Assets
     def __init__(self):
         self.description = "Removable Drive is used to extract Decrypted Assets from a Rig"
     def __repr__(self):
         return 'Removable Drive'
 
-class Security_Chip:  # Required to Encrypt or Decrypt Hacker or Rig Inventory
+class SecurityChip:  # Required to Encrypt or Decrypt Hacker or Rig Inventory
     def __init__(self):
         self.description = "Security Chip is used to Encrypt Assets held within Rig Inventory"
     def __repr__(self):
         return 'Security Chip'
 
-class Hardware_Patch:  # Required to level up a Rig
+class HardwarePatch:  # Required to level up a Rig
     description = "Hardware Patch is used to Upgrade a Rig to the next Level"
     def __init__(self):
         pass

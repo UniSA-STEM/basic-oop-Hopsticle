@@ -10,7 +10,6 @@ This is my own work as defined by the University's Academic Misconduct Policy.
 import random
 import Items
 import Rig
-from Items import Data_Spike
 
 
 def load_names(filename='Hacker Names'):
@@ -97,7 +96,7 @@ class Attack:
             input(f'Which Rig will you attack?'
                 f'\n {all_hackers.name}')
             for rig in all_hackers:
-                Inventory(self.items).remove(Data_Spike)
+                Inventory.remove(Items.DataSpike)
 
 
 class Scan():
@@ -107,23 +106,24 @@ class Scan():
 class Decrypt:
     def __init__(self):
         if Items.Security_Chip in Inventory:
-            Inventory.items.remove(Items.Security_Chip)
+            Inventory.items.remove(Items.SecurityChip)
             for items in inventory with Items.ItemTally() Encrypted = True
                 Encrypted = False
 
 class Encrypt:
     def __init__(self):
         if Items.Security_Chip in Inventory:
-            Inventory.items.remove(Items.Security_Chip)
+            Inventory.items.remove(Items.SecurityChip)
             for items in inventory with Items.ItemTally() Encrypted = False
             Encrypted = True
 
 class Upgrade:
-    def __init__(self, all_hackers):
+    def __init__(self):
         if self.rig.level >= 3:
             print('You cannot upgrade further')
         else:
             self.rig.level = self.rig.level + 1
+            Inventory.remove(Items.HardwarePatch)
 
 class repair:
     def __init__(self, all_hackers):

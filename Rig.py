@@ -26,9 +26,9 @@ items = load_assets()
 
 
 class Rig:
-    def __init__(self, name=None, damage=0, level=1):
+    def __init__(self, name=None, level=1):
         self.name = name
-        self.damage = damage
+        self.damage = 0
         self.level = level
 
         self.rig_storage_items = []
@@ -39,7 +39,7 @@ class Rig:
         self.rig_broken_status = Broken_Status(self.damage)
 
     def set_default_rig_storage(self):
-        self.rig_storage_items = [Items.Data_Spike(), Items.Data_Spike(), Items.Removable_Drive(), '*', '*']
+        self.rig_storage_items = [Items.DataSpike(), Items.DataSpike(), Items.RemovableDrive(), '*', '*']
 
     def get_current_rig_storage(self):
         return self.rig_storage_items
@@ -71,7 +71,7 @@ class Storage:
 class Condition:
     def __init__(self, damage):
 
-        if damage > 3:
+        if damage >= 3:
             self.condition = 'Blue Screen'
         elif damage > 2:
             self.condition = 'Laggy'
@@ -115,3 +115,12 @@ class Broken_Status:
 
     def __str__(self):
         return str(self.broken_status)
+
+test = Rig()
+print(test)
+test.damage = Damage_Taken(0, 2)
+total_damage = test.damage and test.damage
+print(test.damage)
+print(test.damage)
+
+print(test)
