@@ -7,7 +7,6 @@ Username: corjy027
 This is my own work as defined by the University's Academic Misconduct Policy.
 """
 
-
 # import Asset
 import random
 
@@ -22,10 +21,12 @@ def load_assets(filename='Asset List'):
         print('No Assets Found.')
         return []
 
+
 items = load_assets()
 
+
 class Rig:
-    def __init__(self, name=None,damage=0, level=1):
+    def __init__(self, name=None, damage=0, level=1):
         self.name = name
         self.damage = damage
         self.level = level
@@ -48,6 +49,7 @@ class Rig:
                 f'| Condition: {self.rig_condition}| Broken: {self.rig_broken_status}'
                 f'\n{self.get_current_rig_storage()}')
 
+
 class Storage:
     def __init__(self, level):
         if level == 1:
@@ -59,7 +61,7 @@ class Storage:
         else:
             self.max_capacity = 0
 
-    def get_max_capacity(self, level):
+    def get_max_capacity(self):
         return self.max_capacity
 
     def __repr__(self):
@@ -68,16 +70,15 @@ class Storage:
 
 class Condition:
     def __init__(self, damage):
-        if damage >= 5:
-            self.condition = 'FUBAR'
-        elif damage == 4:
-            self.condition = 'Blue Screening'
-        elif damage == 3:
+
+        if damage > 3:
+            self.condition = 'Blue Screen'
+        elif damage > 2:
             self.condition = 'Laggy'
-        elif damage == 2:
-            self.condition = 'OK'
-        elif damage == 1:
-            self.condition = 'PSA 8'
+        elif damage > 1:
+            self.condition = 'OK Performance'
+        elif damage > 0:
+            self.condition = 'Running Great'
         elif damage == 0:
             self.condition = 'Gem Mint'
         else:
@@ -87,9 +88,27 @@ class Condition:
         return f'{self.condition}'
 
 
+class Damage_Taken:
+    def __init__(self, damage, level):
+        self.damage = damage
+        self.level = level
+        self.damage_taken = 0
+
+        if level == 1:
+            self.damage_taken = 1
+        if level == 2:
+            self.damage_taken = .75
+        if level == 3:
+            self.damage_taken = .6
+
+    def __str__(self):
+        self.damage = self.damage + self.damage_taken
+        return (f'{self.damage_taken} Damage Taken, currently on {self.damage} Total Damage Taken')
+
+
 class Broken_Status:
     def __init__(self, damage):
-        if damage >= 5:
+        if damage >= 3:
             self.broken_status = True
         else:
             self.broken_status = False
