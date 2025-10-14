@@ -26,7 +26,7 @@ names = load_names()
 class Hacker:
     def __init__(self, name=random.choice(names),trace_level_value = 0, inventory=None, ):
         self.name = name
-        self.trace_info = Trace_level(trace_level_value)
+        self.trace_info = TraceLevel(trace_level_value)
         self.rig = Rig.Rig(name=self.name)
 
         if inventory is None:
@@ -40,7 +40,7 @@ class Hacker:
                 f'\n{self.rig}')
 
 
-class Trace_level:
+class TraceLevel:
     def __init__(self, trace_level=0):
         self.trace_level = trace_level
         self.rig_level = 0
@@ -78,82 +78,116 @@ class Inventory:
     def __str__(self):
         return f'Inventory: {self.items}'
 
-
+#TODO return the correct actions and include way to exit the menu, implement Lay Low to reduce trace level by 2
 class Actions:
     def __init__(self, inventory, items):
         self.inventory = inventory
         self.items = items
-        self.actions_list = ['Attack', 'Scan', '(En/De)Crypt', 'Upgrade/Repair', 'Buy', 'Extract']
+        self.actions_list = ['Attack', 'Scan', 'Encrypt', 'Decrypt', 'Upgrade', 'Repair', 'Extract', 'Lay Low']
 
     def get_list_actions(self):
         return(f'Available Actions: {(self.actions_list)}')
 
+    def available_actions(self):
+        return(f'Available Actions: {(self.actions_list)}')
 
 
+#TODO Complete attack and damage calculation integration
 class Attack:
-    def __init__(self, items, damage, all_hackers):
-        if Items.Data_Spike in Inventory:
-            input(f'Which Rig will you attack?'
-                f'\n {all_hackers.name}')
-            for rig in all_hackers:
-                Inventory.remove(Items.DataSpike)
+    def __init__(self, items,attacker, damage, all_hackers):
+        attack_menu = True
+        self.attacker = attacker
+        self.all_hackers = all_hackers
+
+        while attack_menu is True:
+            if Items.DataSpike in self.attacker.inventory.items:
+                Scan.scanned_hackers()
+                attack_choice = input(f'Which Rig will you attack? (x to cancel)')
+                if attack_choice == 'x':
+                    print('Canceled by user')
+                    attack_menu = False
+                # elif attack_choice in Scan.scanned_hackers():
+                #     Rig.calculate_damage for attack_choice
+
+                else:
+                    print('You need a Data Spike to attack.')
 
 
+                for rig in all_hackers:
+                    Inventory.remove(Items.DataSpike)
+
+
+#TODO Ensure scan accurately returns only one rig found per scan
 class Scan():
     def __init__(self, all_hackers):
-        return(all_hackers.name)
+        not_scanned_hackers = all_hackers.copy()
+        scan_menu = True
+        while scan_menu is True:
+            scanned_hackers = []
 
-class Decrypt:
-    def __init__(self):
-        if Items.Security_Chip in Inventory:
-            Inventory.items.remove(Items.SecurityChip)
-            for items in inventory with Items.ItemTally() Encrypted = True
-                Encrypted = False
+            print(f'Scanning for Rigs')
+            if not_scanned_hackers != 0 :
+                for rig in not_scanned_hackers:
+                    found_rig = random.choice(not_scanned_hackers)
+                    if found_rig.name == rig.name:
+                        scanned_hackers.append(rig)
+                        not_scanned_hackers.remove(found_rig)
+            else:
+                print(f'No Rigs found')
 
-class Encrypt:
-    def __init__(self):
-        if Items.Security_Chip in Inventory:
-            Inventory.items.remove(Items.SecurityChip)
-            for items in inventory with Items.ItemTally() Encrypted = False
-            Encrypted = True
+            print(f'You have found Rigs {scanned_hackers}')
 
-class Upgrade:
-    def __init__(self):
-        if self.rig.level >= 3:
-            print('You cannot upgrade further')
-        else:
-            self.rig.level = self.rig.level + 1
-            Inventory.remove(Items.HardwarePatch)
 
-class repair:
-    def __init__(self, all_hackers):
-        if self.rig.damage_taken == 0:
-            print(f'You cannot use this item')
+    def scanned_hackers(self):
 
-class Extract:
-    def __init__(self):
-        for items in Rig.Storage:
-            if ItemTally() encrypter = False
-            items.remove(self.Rig.storage)
-            items.append(Inventory)
+        return(f'Scanned Hackers: {self.scanned_hackers()}')
 
-#     if Items.CryptoToken in Hacker.name(Inventory):
-#         action_upgrade = True
-#     if Items.CryptoToken in Hacker.name(Inventory) and hacker_rig.name.damage > 0:
-#         action_repair = True
-#     if Items.Security_Chip in Hacker.name(Inventory) and:
-#         action_encrypt = True
-#     if Items.Security_Chip in Hacker.name(Inventory) and:
-#         action_decrypt = True
-#     action_buy = True
-#     if Items.Removable_Drive in Hacker.name(Inventory) and Hacker.name(Rig.name).Asset:
-#         action_extract = True
-
-# go = Actions.get_list_actions
-# print(go)
-
-# class Scan:
+#TODO Initialise the remainder og the actions
+# class Decrypt:
 #     def __init__(self):
+#         decrypt_menu = True
+#         while decrypt_menu is True:
+#             if Items.Security_Chip in Inventory:
+#                 Inventory.items.remove(Items.SecurityChip)
+#                 for items in inventory with Items.ItemTally() Encrypted = True
+#                     Encrypted = False
+# class Encrypt:
+#     def __init__(self):
+#         encrypt_menu = True
+#         while encrypt_menu is True:
+#             if Items.Security_Chip in Inventory:
+#                 Inventory.items.remove(Items.SecurityChip)
+#                 for items in inventory with Items.ItemTally() Encrypted = False
+#                     Encrypted = True
+# class Upgrade:
+#     def __init__(self):
+#         upgrade_menu = True
+#         while upgrade_menu is True:
+#             if self.rig.level >= 3:
+#                 print('You cannot upgrade further')
+#             else:
+#                 self.rig.level = self.rig.level + 1
+#                 self.inventory.remove(Items.HardwarePatch)
+# class Repair:
+#     def __init__(self, all_hackers):
+#         repair_menu = True
+#         while repair_menu is True:
+#             if self.rig.damage_taken == 0:
+#                 print(f'You cannot use this item')
+#             else:
+#                 self.rig.damage_taken - 1
+# class Extract:
+#     def __init__(self):
+#         extract_menu = True
+#         while extract_menu is True:
+#             for items in Rig.Storage:
+#                 if ItemTally() encrypter = False
+#                 items.remove(self.Rig.storage)
+#                 items.append(Inventory)
+
+#TODO Potentially implement a Black Market for items
+#action_buy = True
+
 
 # Scan Inventory
 # print(Inventory)

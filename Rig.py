@@ -87,7 +87,13 @@ class Condition:
     def __str__(self):
         return f'{self.condition}'
 
+#TODO Initialise a way to calculate damage based on current level
+class Calculate_Damage:
+    def __init__(self, damage):
+        pass
 
+
+#TODO ensure damage taken is accurately reflected
 class Damage_Taken:
     def __init__(self, damage, level):
         self.damage = damage
@@ -103,7 +109,7 @@ class Damage_Taken:
 
     def __str__(self):
         self.damage = self.damage + self.damage_taken
-        return (f'{self.damage_taken} Damage Taken, currently on {self.damage} Total Damage Taken')
+        return (f'{self.damage_taken} Damage Taken, currently on {self.damage} Total Damage Taken ')
 
 
 class Broken_Status:
@@ -116,11 +122,13 @@ class Broken_Status:
     def __str__(self):
         return str(self.broken_status)
 
-test = Rig()
-print(test)
-test.damage = Damage_Taken(0, 2)
-total_damage = test.damage and test.damage
-print(test.damage)
-print(test.damage)
-
-print(test)
+'''
+# test = Rig()
+# print(test)
+# test.damage = Damage_Taken(0, 2)
+# total_damage = test.damage and test.damage
+# print(test.damage)
+# print(test.damage)
+#
+# print(test)
+'''
