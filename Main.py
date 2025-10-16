@@ -12,6 +12,7 @@ import random
 import Items
 import Hacker
 import Rig
+all_hackers = []
 
 def game_info():
     print('Welcome to Cyber-Scape!'
@@ -20,7 +21,7 @@ def game_info():
           '\nAre you up the the Challenge?!\n')
 
 def main():
-    all_hackers = []
+
     default_level_instance = Hacker.TraceLevel()
     hacker_number = input('How many Hackers will there be? ')
     print()
@@ -33,7 +34,7 @@ def main():
         print(new_hacker)
         print()
 
-    print(f'Hackers added:')
+    print(f'Hackers added:\n')
     for hacker in all_hackers:
         print(hacker.name)
     print(
@@ -50,6 +51,7 @@ class GameManager():
         self.turn = 0
         self.current_hacker = None
         self.game_running = True
+        self.scanned_hackers = []
 
     def get_current_hacker(self):
         self.current_hacker = self.all_hackers[self.turn % self.num_hackers]
@@ -61,19 +63,23 @@ class GameManager():
 
     def menu(self, active_hacker):
         print(f'** It is currently {active_hacker.name}\'s turn **')
-        print('---Menu---'
-              '\n1. Actions'
+        print(self.current_hacker.rig)
+        print('\n---Menu---'
+              '\n1. Hacker Actions'
               '\n2. Items'
               #TODO implement tig actions alongside normal actions
               '\n3. Hackers'
-              '\n10. Exit')
+              '\n10. Exit\n')
 
         while self.game_running is True:
             menu_choice = int(input('What menu would you like to explore? '))
+            print()
             if menu_choice == 1:
-                self.actions_menu(self.current_hacker)
+                self.actions_menu(self.get_current_hacker)
             elif menu_choice == 2:
                 self.items_menu()
+            elif menu_choice == 3:
+                Hacker.Scan.found_hackers(self)
             elif menu_choice == 10:
                 self.game_running = False
 
@@ -94,15 +100,22 @@ class GameManager():
 
     #TODO potentially implement a way of only showing actions based on current inventory
     def actions_menu(self, active_hacker):
-        actions_instance = Hacker.Actions('', '')
+        actions_instance = Hacker.Actions()
         print(actions_instance.get_list_actions(),sep= ', ')
         print()
         action_menu_choice = input('What action will you take? ')
-        if action_menu_choice == 'attack' or '1':
+
+        if action_menu_choice == 'attack' or action_menu_choice == '1':
+
+            Hacker.Scan.scanned_hackers
+            attack_target = input('Who is your attack target?')
+
             #TODO Print list of attack targets based on found rigs from scan, have user select rig to deal damage
             Hacker.Attack(active_hacker)
-        if action_menu_choice == 'Scan' or '2':
-            Hacker.Scan(active_hacker)
+        elif action_menu_choice == 'scan' or action_menu_choice == '2':
+            Hacker.Scan()
+        else:
+            print(f'Action {action_menu_choice} not found')
         #TODO ensure that each hacker can only take one action per turn on completion
 
 
