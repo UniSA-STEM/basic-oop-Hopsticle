@@ -60,7 +60,7 @@ class GameManager():
                        '\n1. Hacker Actions'
                        '\n2. Items'
                        '\n3. Hackers'
-                       '\n4. Rig Inventory'
+                       '\n4. View Inventory'
                        '\n5. Menu'
                        '\n9. Pass'
                        '\n10. Exit\n')
@@ -78,12 +78,13 @@ class GameManager():
     def menu(self, active_hacker):
         print(
             f'*** ROUND {self.global_round} | {active_hacker.name}\'s Turn #{active_hacker.turns_taken + 1}'
-            f' | (AP: {active_hacker.action_points})***')
+            f' | (AP: {active_hacker.action_points}) ***')
         print()
         print(self.current_hacker.rig)
         print(self.menu_items)
 
         while self.game_running is True:
+            print()
             menu_choice = int(input('What menu would you like to explore? (5 for menu options) '))
             print()
             if menu_choice == 1:
@@ -93,9 +94,16 @@ class GameManager():
             elif menu_choice == 3:
                 Hacker.Scan.found_rigs(self)
             elif menu_choice == 4:
-                print(self.current_hacker.rig.get_current_rig_storage())
+                print(f"--- {active_hacker.name}'s Inventory & Rig Storage ---")
+                print(active_hacker.inventory)
+                print(active_hacker.rig)
+                print("-" * 35)
             elif menu_choice == 5:
                 print(self.menu_items)
+            elif menu_choice == 6:
+                print(Hacker.Hacker.format_item_display(self.current_hacker.name))
+                print(f'{self.current_hacker.name}\'s', (Hacker.Inventory()))
+
             elif menu_choice == 9:
                 print(f'{active_hacker.name} is passing their turn.')
                 return
@@ -105,7 +113,7 @@ class GameManager():
     #TODO change so that encrypted status only shows when hacker is looking at storage or inventory
     def items_menu(self):
         print(*Items.load_items(),sep=', ')
-        item_input = input('Which item would you like information on? ').lower()
+        item_input = input('Which item would you like information on? ')
         found_item_name = None
 
         try:
@@ -117,7 +125,6 @@ class GameManager():
         except Exception:
             pass
 
-    #TODO potentially implement a way of only showing actions based on current inventory
     def actions_menu(self, active_hacker):
         actions_instance = Hacker.Actions()
         print(actions_instance.get_list_actions(),sep= ', ')
@@ -127,14 +134,10 @@ class GameManager():
 
 
         if action_menu_choice == 'attack' or action_menu_choice == '1':
-
-            #TODO Print list of attack targets based on found rigs from scan, have user select rig to deal damage
             Hacker.Attack(active_hacker)
 
         elif action_menu_choice == 'scan' or action_menu_choice == '2':
             Hacker.Scan(active_hacker, all_hackers)
-
-        #TODO ensure that each hacker can only take one action per turn on completion
 
         elif action_menu_choice == 'encrypt' or action_menu_choice == '3':
             Hacker.Encrypt(active_hacker)
@@ -162,12 +165,12 @@ class GameManager():
 
         while self.game_running:
             active_hacker = self.get_current_hacker()
-            active_hacker.reset_action_points()
             self.menu(active_hacker)
 
             if self.game_running:
                 self.next_turn()
                 self.turn_display = (self.turn // 3) + 1
+                print(f'{active_hacker.name: active_hacker.action_points}\'s Turn')
 
 if __name__ == '__main__':
     game_info()
