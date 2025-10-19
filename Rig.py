@@ -36,7 +36,7 @@ class Rig:
         self.set_default_rig_storage()
         self.rig_storage_capacity = Storage(self.level)
         self.rig_condition = Condition(self.damage)
-        self.rig_broken_status = Broken_Status(self.damage)
+        self.rig_broken_status = BrokenStatus(self.damage)
 
     def set_default_rig_storage(self):
         self.rig_storage_items = [Items.DataSpike(), Items.DataSpike(), Items.RemovableDrive(), '*', '*']
@@ -88,13 +88,13 @@ class Condition:
         return f'{self.condition}'
 
 #TODO Initialise a way to calculate damage based on current level
-class Calculate_Damage:
+class CalculateDamage:
     def __init__(self, damage):
         pass
 
 
 #TODO ensure damage taken is accurately reflected
-class Damage_Taken:
+class DamageTaken:
     def __init__(self, damage, level):
         self.damage = damage
         self.level = level
@@ -112,7 +112,7 @@ class Damage_Taken:
         return (f'{self.damage_taken} Damage Taken, currently on {self.damage} Total Damage Taken ')
 
 
-class Broken_Status:
+class BrokenStatus:
     def __init__(self, damage):
         if damage >= 3:
             self.broken_status = True

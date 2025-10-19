@@ -9,10 +9,8 @@ This is my own work as defined by the University's Academic Misconduct Policy.
 
 import random
 import Items
-import Main
 import Rig
-from Main import all_hackers
-
+from Main import GameManager
 
 def load_names(filename='Hacker Names'):
     try:
@@ -24,9 +22,8 @@ def load_names(filename='Hacker Names'):
 
 
 names = load_names()
-class ActionCounter:
-    def __init__(self):
-        counter = 0
+
+
 
 class Hacker:
     def __init__(self, name=random.choice(names),trace_level_value = 0, inventory=None, ):
@@ -44,6 +41,19 @@ class Hacker:
                 f'\n{self.inventory}'
                 f'\n{self.rig}')
 
+class ActionTracker:
+    def __init__(self, counter = 1):
+        self.counter = counter
+
+    def available_points(self):
+        return self.counter
+
+    def calculate_actions(self):
+
+        if self.counter == 0:
+            print('No more actions are available.')
+        else:
+            self.counter -= 1
 
 class TraceLevel:
     def __init__(self, trace_level=0):
@@ -77,17 +87,24 @@ class TraceLevel:
 
     def __repr__(self):
         return f'Trace Level {self.trace_level} | Action success rate {self.get_success_chance():.2f}%'
+class SuccessCheck:
+    def __init__(self):
+        pass
+        #TODO have action point show as available for menu select
 
-    def  successful_action(self):
+    def  successful_action_check(self):
         self.action_success = False
+        if ActionTracker.counter == 1:
 
-        random_chance = random.uniform(0, 100)
-        if random_chance <= self.success_chance:
-            print('Successful Action')
-            self.action_success = True
-            self.increase_trace_level()
-        else:
-            print('Failed Action')
+
+            random_chance = random.uniform(0, 100)
+            if random_chance <= self.success_chance:
+                print('Successful Action')
+                self.action_success = True
+                self.increase_trace_level()
+
+            else:
+                print('Failed Action')
 
 class Inventory:
     def __init__(self):
@@ -113,56 +130,80 @@ class Actions:
 
 #TODO Complete attack and damage calculation integration
 class Attack:
-    def __init__(self, items,attacker, all_hackers):
+    def __init__(self, attacker, points):
         attack_menu = True
         self.attacker = attacker
-        self.scanned_hackers = Scan.scanned_hackers
-        Scan(self.scanned_hackers)
+        self.scanned_hackers = Scan.found_rigs
+        Scan(self.found_rigs)
+        self.available_points = points.get_available_points()
 
-        while attack_menu is True:
-            if Items.DataSpike in self.attacker.inventory.items:
-                Scan.scanned_hackers()
-                attack_choice = input(f'Which Rig will you attack? (x to cancel)')
-                if attack_choice == 'x':
-                    print('Cancelled by user')
-                    attack_menu = False
+        ActionTracker.calculate_actions()
+        if self.available_points == 1:
+            while attack_menu is True:
+                if Items.DataSpike in self.attacker.inventory.items:
+                    Scan.found_rigs()
+                    attack_choice = input(f'Which Rig will you attack? (x to cancel)')
+                    if attack_choice == 'x':
+                        print('Cancelled by user')
+                        Inventory.remove(Items.DataSpike)
+                    # elif attack_choice in Scan.scanned_hackers():
+                    #     Rig.calculate_damage for attack_choice
 
-                # elif attack_choice in Scan.scanned_hackers():
-                #     Rig.calculate_damage for attack_choice
+                else:
+                    print('You need a Data Spike to attack.')
+                attack_menu = False
 
-            else:
-                print('You need a Data Spike to attack.')
-
-
-                for rig in all_hackers:
-                    Inventory.remove(Items.DataSpike)
 
 
 #TODO Ensure scan accurately returns only one rig found per scan
 class Scan():
-    def __init__(self):
-        self.scanned_hackers = []
-        self.not_scanned_hackers = all_hackers.copy()
-        print(Main.all_hackers)
+    def __init__(self, manager):
+        rig_list_result = manager.hacker_list()
+        self.all_hackers_list = rig_list_result
 
-        print(f'Scanning for Rigs')
-        while self.not_scanned_hackers:
-            found_rig = random.choice(self.not_scanned_hackers)
-            self.scanned_hackers.append(found_rig)
-            self.not_scanned_hackers.remove(found_rig)
+
+    def all_rigs_list(self):
+        self.all_rigs_list = list(self.all_hackers_list)
+        return self.all_rigs_list
+
+        # hacker list is rig list
+        #
+        # found list is rig list - self
+        #
+        # scan from rig list - found list
+
+    def found_rigs(self):
+        self.found_rigs = []
+        return self.found_rigs
+
+
+    def rig_scanning(self):
+        current_hacker = GameManager.get_current_hacker
+        self.target_rigs = [
+            hacker for hacker in Scan.all_rigs_list(self)
+            if hacker is not current_hacker
+        ]
+
+        print(f'Scanning for Rigs...'
+              f'\n..'
+              f'\n.')
+
+        found_rig = random.choice(self.target_rigs)
+        self.found_rigs.append(found_rig)
+        self.target_rigs.remove(found_rig)
+
+        if self.found_rigs:
+            for hacker in self.found_rigs:
+                print(f'- {hacker.name}')
+
         else:
             print(f'No Rigs found')
 
-            for hacker in self.scanned_hackers:
-                print(f'- {hacker.name}')
-
-        #TODO implement turn ender and counter
-
-    def found_hackers(self):
-        if self.scanned_hackers:
-            print(f'Scanned Hackers: {self.scanned_hackers}')
-        else:
-            print(f'No Hackers found')
+    # def found_rigs(self, manager):
+    #     if self.found_rigs:
+    #         print(f'Scanned Rigs: {self.found_rigs}')
+    #     else:
+    #         print(f'No Rigs found')
 
 #TODO Initialise the remainder og the actions
 # class Decrypt:
@@ -206,6 +247,9 @@ class Scan():
 #                 if ItemTally() encrypter = False
 #                 items.remove(self.Rig.storage)
 #                 items.append(Inventory)
+# class LayLow:
+#   def __init__(self):
+#       trace level value = trace_level_value - 1
 
 #TODO Potentially implement a Black Market for items
 #action_buy = True
