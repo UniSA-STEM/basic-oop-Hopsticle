@@ -116,12 +116,32 @@ class Rig:
             print("Rig storage capacity did not change (or is maxed).")
 
     def __str__(self):
+        storage_display = self.format_storage_display()
         return (  f'Rig:     {self.name}\'s | Level: {self.level} | Damage Taken: {self.damage}'
                 f' | Condition: {self.rig_condition}| Broken: {self.rig_broken_status}'
-                f'\nStorage: {self.get_current_rig_storage()}')
+                f'\nStorage: {storage_display}')
 
     def is_broken(self):
         return self.rig_broken_status.broken_status
+
+    def format_storage_display(self):
+        display_list = []
+        for item in self.rig_storage_items:
+
+            if isinstance(item, str) and item == '*':
+                display_list.append('*')
+                continue
+
+            item_name = type(item).__name__
+
+            is_encrypted = getattr(item, 'encrypted', False)
+
+            if is_encrypted:
+                display_list.append(f'{item_name} (*)')
+            else:
+                display_list.append(item_name)
+
+        return ', '.join(display_list)
 
 #TODO ensure max storage is increased and appended when level increases
 class Storage:

@@ -9,9 +9,7 @@ This is my own work as defined by the University's Academic Misconduct Policy.
 
 import random
 import Items
-import Main
 import Rig
-from Main import all_hackers
 
 
 def load_names(filename='Hacker Names'):
@@ -119,6 +117,9 @@ class Inventory:
     def has_item(self, item_class):
         return any(isinstance(item, item_class) for item in self.items)
 
+    def add_item(self, item_instance):
+        self.items.append(item_instance)
+
     def remove_item(self, item_class):
         for index, item in enumerate(self.items):
             if isinstance(item, item_class):
@@ -186,7 +187,7 @@ class Attack:
                 print(f'Attack successful against {target_hacker.name}\'s Rig! Damage applied. Item consumed.')
                 if target_hacker.rig.is_broken():
                     print(
-                        f"\n!!! NETWORK ALERT !!! {target_hacker.name}'s Rig has been CRITICALY DAMAGED and is VULNERABLE to EXPLOIT!")
+                        f"\n!!! NETWORK ALERT !!! {target_hacker.name}'s Rig has been CRITICALLY DAMAGED and is VULNERABLE to EXTRACTION!")
             else:
                 print('Attack failed, Data Spike lost.')
 
@@ -232,18 +233,20 @@ class Decrypt:
     def __init__(self, active_hacker):
         hacker = active_hacker
         item_class = Items.SecurityChip
+
         if hacker.inventory.remove_item(item_class):
             decrypted_count = 0
-            for item in hacker.inventory.items:
-                if getattr(item, 'encrypted', False):
-                    setattr(item, 'encrypted', False)
-                    decrypted_count += 1
+            for item in hacker.rig.rig_storage_items:
+                if not isinstance(item, str) and item != '*':
+                    if getattr(item, 'encrypted', False):
+                        setattr(item, 'encrypted', False)
+                        decrypted_count += 1
 
             if decrypted_count > 0:
-                print(f'Decrypt Successful: {decrypted_count} items in Inventory are now Decrypted.')
+                print(f'Decrypt Successful: {decrypted_count} assets in Rig Storage are now Decrypted.')
             else:
-                print('Decrypt Failed: All items in Inventory are already Decrypted.')
-                hacker.inventory.items.append(Items.SecurityChip())
+                print('Decrypt Failed: All assets in Rig Storage are already Decrypted or Rig Storage is empty.')
+                hacker.inventory.add_item(Items.SecurityChip())
         else:
             print('Decrypt Failed: You need a Security Chip in your Inventory.')
 
@@ -252,18 +255,20 @@ class Encrypt:
     def __init__(self, active_hacker):
         hacker = active_hacker
         item_class = Items.SecurityChip
+
         if hacker.inventory.remove_item(item_class):
             encrypted_count = 0
-            for item in hacker.inventory.items:
-                if not getattr(item, 'encrypted', False):
-                    setattr(item, 'encrypted', True)
-                    encrypted_count += 1
+            for item in hacker.rig.rig_storage_items:
+                if not isinstance(item, str) and item != '*':
+                    if not getattr(item, 'encrypted', False):
+                        setattr(item, 'encrypted', True)
+                        encrypted_count += 1
 
             if encrypted_count > 0:
-                print(f'Encrypt Successful: {encrypted_count} items in Inventory are now Encrypted.')
+                print(f'Encrypt Successful: {encrypted_count} assets in Rig Storage are now Encrypted.')
             else:
-                print('Encrypt Failed: All items in Inventory are already Encrypted.')
-                hacker.inventory.items.append(Items.SecurityChip())
+                print('Encrypt Failed: All assets in Rig Storage are already Encrypted or Rig Storage is empty.')
+                hacker.inventory.add_item(Items.SecurityChip())
         else:
             print('Encrypt Failed: You need a Security Chip in your Inventory.')
 
@@ -321,6 +326,41 @@ class Repair:
 
 
 class Extract:
+    def __init__(self, active_hacker):
+        hacker = active_hacker
+        item_class = Items.RemovableDrive
+
+        has_item = hacker.inventory.has_item(item_class) or hacker.rig.has_item_in_storage(item_class)
+        if not has_item:
+            print('Extraction Failed: Requires a Removable Drive in your Inventory or Rig Storage.')
+            return
+
+        if not (hacker.inventory.remove_item(item_class) or hacker.rig.consume_item(item_class)):
+            print("Error consuming Removable Drive. Extraction cancelled.")
+            return
+
+        moved_count = 0
+        moved_items_names = []
+
+        indices_to_clear = []
+
+        for i, item in enumerate(hacker.rig.rig_storage_items):
+            if not isinstance(item, str) and item != '*':
+                hacker.inventory.add_item(item)
+                moved_items_names.append(type(item).__name__)
+                indices_to_clear.append(i)
+                moved_count += 1
+
+        for index in indices_to_clear:
+            hacker.rig.rig_storage_items[index] = '*'
+
+        if moved_count > 0:
+            print(f'Extraction Successful: Moved {moved_count} asset(s) from Rig Storage to Inventory.')
+            print(f'Assets Moved: {", ".join(moved_items_names)}.')
+        else:
+            print('Extraction Complete: No assets were found in Rig Storage to move.')
+
+class Exploit:
     def __init__(self, active_hacker, target_hacker):
         item_class = Items.RemovableDrive
 

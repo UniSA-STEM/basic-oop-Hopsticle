@@ -161,9 +161,40 @@ class GameManager():
             Hacker.LayLow(active_hacker)
             return
 
-        elif action_menu_choice == 'extract' or action_menu_choice == '6':
-            Hacker.Extract(active_hacker)
-            return
+
+        elif action_menu_choice == 'exploit' or action_menu_choice == '6':
+            scanned_list = active_hacker.scanned_rigs
+            target_hacker = None
+            selection_complete = False
+
+            if not scanned_list:
+                print('Cannot extract: No rigs have been scanned yet.')
+                return
+
+            while not selection_complete:
+
+                Hacker.Scan().found_rigs(active_hacker)
+                extract_choice = input('Who will you extract from? (Enter number, "x" to cancel): ').lower().strip()
+                if extract_choice == 'x':
+                    print('Extraction cancelled.')
+                    return
+                else:
+                    try:
+                        target_index = int(extract_choice)
+                        if 1 <= target_index <= len(scanned_list):
+                            target_hacker = scanned_list[target_index - 1]
+                            selection_complete = True
+                        else:
+                            print(f'Invalid selection. Please choose a number between 1 and {len(scanned_list)}.')
+                    except ValueError:
+                        print('Invalid input. Please enter the number next to the target.')
+
+
+
+            if target_hacker:
+                Hacker.Exploit(active_hacker, target_hacker)
+
+                return
 
         elif action_menu_choice == 'upgrade' or action_menu_choice == '7':
             Hacker.Upgrade(active_hacker)
