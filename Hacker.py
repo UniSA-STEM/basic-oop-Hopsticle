@@ -29,7 +29,7 @@ class ActionCounter:
         counter = 0
 
 class Hacker:
-    def __init__(self, name=random.choice(names),trace_level_value = 0, inventory=None, ):
+    def __init__(self, name=random.choice(names),trace_level_value = 5, inventory=None, ):
         self.name = name
         self.trace_info = TraceLevel(trace_level_value)
         self.rig = Rig.Rig(name=self.name)
@@ -95,16 +95,15 @@ class Inventory:
         self.items = [Items.CryptoToken()]
 
     def has_item(self, item_class):
-        # Checks if any item in the list is an instance of the class provided (item_class)
         return any(isinstance(item, item_class) for item in self.items)
 
     def remove_item(self, item_class):
         for i, item in enumerate(self.items):
-            # Find the first item that matches the class type
+
             if isinstance(item, item_class):
                 self.items.pop(i)
-                return True  # Item removed successfully
-        return False  # Item not found
+                return True
+        return False
 
     def __str__(self):
         item_names = [item.__class__.__name__ for item in self.items]
@@ -113,8 +112,8 @@ class Inventory:
 #TODO return the correct actions and include way to exit the menu, implement Lay Low to reduce trace level by 2
 class Actions:
     def __init__(self):
-        self.hacker_actions_list = ['Attack', 'Scan', 'Encrypt', 'Decrypt', 'Lay Low']
-        self.rig_actions_list = ['Extract', 'Upgrade', 'Repair']
+        self.hacker_actions_list = ['1. Attack', '2. Scan', '3. Encrypt', '4. Decrypt', '5. Lay Low']
+        self.rig_actions_list = ['6. Extract', '7. Upgrade', '8. Repair']
 
     def get_list_actions(self):
         return(f'Hacker Actions: {(self.hacker_actions_list)}\n'
@@ -128,13 +127,16 @@ class Actions:
 #TODO Complete attack and damage calculation integration
 class Attack:
     def __init__(self, active_hacker):
-        hacker = active_hacker
-        scanned_list = hacker.scanned_hackers
+        self.hacker = active_hacker
+        scanned_list = self.hacker.scanned_rigs
 
         selection_complete = False
         target_hacker = None
 
-        if not hacker.inventory.has_item(Items.DataSpike):
+        has_spike_in_inventory = self.hacker.inventory.has_item(Items.DataSpike)
+        has_spike_in_rig = any(isinstance(item, Items.DataSpike) for item in self.hacker.rig.rig_storage_items)
+
+        if not (has_spike_in_inventory or has_spike_in_rig):
             print('You need a Data Spike to attack.')
             selection_complete = True
 
@@ -143,7 +145,7 @@ class Attack:
             selection_complete = True
 
         while not selection_complete:
-            Scan().found_rigs(hacker)
+            Scan().found_rigs(self.hacker)
 
             attack_choice = input('Who will you attack? (Enter number, "x" to cancel): ').lower().strip()
 
@@ -166,15 +168,24 @@ class Attack:
                 continue
 
         if target_hacker:
-            print(f'{hacker.name} is preparing to attack {target_hacker.name}...')
+            print(f'{self.hacker.name} is attacking {target_hacker.name}...')
 
-            if hacker.trace_info.successful_action():
+            if self.hacker.trace_info.successful_action():
 
-                print(f'Attack successful against {target_hacker.name}\'s Rig! Item consumed.')
+                raw_damage = 1
+                target_hacker.rig.take_damage(raw_damage)
+
+                print(f'Attack successful against {target_hacker.name}\'s Rig! Damage applied. Item consumed.')
             else:
                 print('Attack failed, Data Spike lost.')
 
-            hacker.inventory.remove_item(Items.DataSpike)
+            removed = self.hacker.inventory.remove_item(Items.DataSpike)
+
+            if not removed:
+                for i, item in enumerate(self.hacker.rig.rig_storage_items):
+                    if isinstance(item, Items.DataSpike):
+                        self.hacker.rig.rig_storage_items.pop(i)
+                        break
 
 class Scan():
     def __init__(self, active_hacker, all_hackers):
@@ -218,7 +229,6 @@ class Scan():
 #                 Inventory.items.remove(Items.SecurityChip)
 #                 for items in inventory with Items.ItemTally() Encrypted = True
 #                     Encrypted = False
-
 # class Encrypt:
 #     def __init__(self):
 #         encrypt_menu = True
@@ -227,7 +237,6 @@ class Scan():
 #                 Inventory.items.remove(Items.SecurityChip)
 #                 for items in inventory with Items.ItemTally() Encrypted = False
 #                     Encrypted = True
-
 # class Upgrade:
 #     def __init__(self):
 #         upgrade_menu = True
@@ -239,14 +248,36 @@ class Scan():
 #                 self.inventory.remove(Items.HardwarePatch)
 
 
-# class Repair:
-#     def __init__(self, all_hackers):
-#         repair_menu = True
-#         while repair_menu is True:
-#             if self.rig.damage_taken == 0:
-#                 print(f'You cannot use this item')
-#             else:
-#                 self.rig.damage_taken - 1
+class Repair:
+    def __init__(self, active_hacker):
+        hacker = active_hacker
+        action_complete = False
+        repair_needed = True
+
+        if hacker.rig.damage == 0:
+            print('Rig has no damage to repair.')
+            repair_needed = False
+            action_complete = True
+        elif not hacker.inventory.has_item(Items.CryptoToken):
+            print('You need a CryptoToken to repair your Rig.')
+            repair_needed = False
+            action_complete = True
+
+        while not action_complete and repair_needed:
+            print(f'{hacker.name} is repairing Rig...')
+
+            if hacker.trace_info.successful_action():
+
+                repair_amount = 1
+                hacker.rig.repair_damage(repair_amount)
+
+                print(f'Repair successful! Damage reduced by {repair_amount}. New damage is {hacker.rig.damage}.')
+            else:
+                print('Repair attempted. Trace Level increased.')
+
+            hacker.inventory.remove_item(Items.CryptoToken)
+
+            action_complete = True
 
 # class Extract:
 #     def __init__(self):

@@ -113,8 +113,6 @@ class GameManager():
 
         if action_menu_choice == 'attack' or action_menu_choice == '1':
 
-            Hacker.Scan.found_rigs()
-
             #TODO Print list of attack targets based on found rigs from scan, have user select rig to deal damage
             Hacker.Attack(active_hacker)
 
