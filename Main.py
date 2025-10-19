@@ -75,7 +75,7 @@ class GameManager():
             menu_choice = int(input('What menu would you like to explore? '))
             print()
             if menu_choice == 1:
-                self.actions_menu(self.get_current_hacker)
+                self.actions_menu(self.get_current_hacker())
             elif menu_choice == 2:
                 self.items_menu()
             elif menu_choice == 3:
@@ -107,16 +107,37 @@ class GameManager():
 
         if action_menu_choice == 'attack' or action_menu_choice == '1':
 
-            Hacker.Scan.scanned_hackers
+            Hacker.Scan.found_hackers()
             attack_target = input('Who is your attack target?')
 
             #TODO Print list of attack targets based on found rigs from scan, have user select rig to deal damage
             Hacker.Attack(active_hacker)
+
         elif action_menu_choice == 'scan' or action_menu_choice == '2':
-            Hacker.Scan()
+            Hacker.Scan(active_hacker, all_hackers)
+
+        #TODO ensure that each hacker can only take one action per turn on completion
+
+        elif action_menu_choice == 'encrypt' or action_menu_choice == '3':
+            Hacker.Encrypt(active_hacker)
+
+        elif action_menu_choice == 'decrypt' or action_menu_choice == '4':
+            Hacker.Decrypt(active_hacker)
+
+        elif action_menu_choice == 'lay low' or action_menu_choice == '5':
+            Hacker.LayLow(active_hacker)
+
+        elif action_menu_choice == 'extract' or action_menu_choice == '6':
+            Hacker.Extract(active_hacker)
+
+        elif action_menu_choice == 'upgrade' or action_menu_choice == '7':
+            Hacker.Upgrade(active_hacker)
+
+        elif action_menu_choice == 'repair' or action_menu_choice == '8':
+            Hacker.Repair(active_hacker)
+
         else:
             print(f'Action {action_menu_choice} not found')
-        #TODO ensure that each hacker can only take one action per turn on completion
 
 
     def start_game(self):

@@ -34,6 +34,8 @@ class Hacker:
         self.trace_info = TraceLevel(trace_level_value)
         self.rig = Rig.Rig(name=self.name)
 
+        self.scanned_hackers = []
+
         if inventory is None:
             self.inventory = Inventory()
         else:
@@ -75,26 +77,38 @@ class TraceLevel:
     def get_success_chance(self):
         return self.success_chance
 
+    def successful_action(self):
+        random_chance = random.uniform(0, 100)
+        is_successful = random_chance <= self.success_chance
+
+        self.increase_trace_level()
+
+        print(f'Successful Action: {self.success_chance} Trace Level Increased: {self.trace_level}' )
+
+        return is_successful
+
     def __repr__(self):
         return f'Trace Level {self.trace_level} | Action success rate {self.get_success_chance():.2f}%'
-
-    def  successful_action(self):
-        self.action_success = False
-
-        random_chance = random.uniform(0, 100)
-        if random_chance <= self.success_chance:
-            print('Successful Action')
-            self.action_success = True
-            self.increase_trace_level()
-        else:
-            print('Failed Action')
 
 class Inventory:
     def __init__(self):
         self.items = [Items.CryptoToken()]
 
+    def has_item(self, item_class):
+        # Checks if any item in the list is an instance of the class provided (item_class)
+        return any(isinstance(item, item_class) for item in self.items)
+
+    def remove_item(self, item_class):
+        for i, item in enumerate(self.items):
+            # Find the first item that matches the class type
+            if isinstance(item, item_class):
+                self.items.pop(i)
+                return True  # Item removed successfully
+        return False  # Item not found
+
     def __str__(self):
-        return f'Inventory: {self.items}'
+        item_names = [item.__class__.__name__ for item in self.items]
+        return f'Inventory: {", ".join(item_names)}'
 
 #TODO return the correct actions and include way to exit the menu, implement Lay Low to reduce trace level by 2
 class Actions:
@@ -113,56 +127,51 @@ class Actions:
 
 #TODO Complete attack and damage calculation integration
 class Attack:
-    def __init__(self, items,attacker, all_hackers):
-        attack_menu = True
-        self.attacker = attacker
-        self.scanned_hackers = Scan.scanned_hackers
-        Scan(self.scanned_hackers)
+    def __init__(self, active_hacker, target_hacker):
+        hacker = active_hacker
+        if not hacker.inventory.has_item(Items.DataSpike):
+            print('You need a Data Spike to attack.')
+            return
 
-        while attack_menu is True:
-            if Items.DataSpike in self.attacker.inventory.items:
-                Scan.scanned_hackers()
-                attack_choice = input(f'Which Rig will you attack? (x to cancel)')
-                if attack_choice == 'x':
-                    print('Cancelled by user')
-                    attack_menu = False
+        if hacker.trace_info.successful_action():
+            print(f"Attack successful against {target_hacker.name}'s Rig!")
+        else:
+            print('Attack failed, Data Spike lost.')
 
-                # elif attack_choice in Scan.scanned_hackers():
-                #     Rig.calculate_damage for attack_choice
+        hacker.inventory.remove_item(Items.DataSpike)
 
-            else:
-                print('You need a Data Spike to attack.')
-
-
-                for rig in all_hackers:
-                    Inventory.remove(Items.DataSpike)
-
-
-#TODO Ensure scan accurately returns only one rig found per scan
 class Scan():
-    def __init__(self):
-        self.scanned_hackers = []
-        self.not_scanned_hackers = all_hackers.copy()
-        print(Main.all_hackers)
+    def __init__(self, active_hacker, all_hackers):
+        hacker = active_hacker
 
-        print(f'Scanning for Rigs')
-        while self.not_scanned_hackers:
-            found_rig = random.choice(self.not_scanned_hackers)
-            self.scanned_hackers.append(found_rig)
-            self.not_scanned_hackers.remove(found_rig)
-        else:
-            print(f'No Rigs found')
+        not_scanned_hackers = [
+            target
+            for target in all_hackers
+            if target.name != hacker.name  # Exclude self
+               and target.name not in [s.name for s in hacker.scanned_hackers]
+        ]
 
-            for hacker in self.scanned_hackers:
+        print(f'Scanning for Rigs...')
+
+        if not not_scanned_hackers:
+            print('No new Rigs found. Network is fully explored.')
+            return
+
+        found_rig = random.choice(not_scanned_hackers)
+        hacker.scanned_hackers.append(found_rig)
+
+        print(f'Rig found: {found_rig.name}')
+        self.found_hackers(hacker)
+
+    def found_hackers(self, active_hacker):
+        scanned_list = active_hacker.scanned_hackers
+
+        if scanned_list:
+            print(f'Scanned Hackers Found So Far ({len(scanned_list)}):')
+            for hacker in scanned_list:
                 print(f'- {hacker.name}')
-
-        #TODO implement turn ender and counter
-
-    def found_hackers(self):
-        if self.scanned_hackers:
-            print(f'Scanned Hackers: {self.scanned_hackers}')
         else:
-            print(f'No Hackers found')
+            print('No Hackers found yet.')
 
 #TODO Initialise the remainder og the actions
 # class Decrypt:
@@ -173,6 +182,7 @@ class Scan():
 #                 Inventory.items.remove(Items.SecurityChip)
 #                 for items in inventory with Items.ItemTally() Encrypted = True
 #                     Encrypted = False
+
 # class Encrypt:
 #     def __init__(self):
 #         encrypt_menu = True
@@ -181,6 +191,7 @@ class Scan():
 #                 Inventory.items.remove(Items.SecurityChip)
 #                 for items in inventory with Items.ItemTally() Encrypted = False
 #                     Encrypted = True
+
 # class Upgrade:
 #     def __init__(self):
 #         upgrade_menu = True
@@ -190,6 +201,8 @@ class Scan():
 #             else:
 #                 self.rig.level = self.rig.level + 1
 #                 self.inventory.remove(Items.HardwarePatch)
+
+
 # class Repair:
 #     def __init__(self, all_hackers):
 #         repair_menu = True
@@ -198,6 +211,7 @@ class Scan():
 #                 print(f'You cannot use this item')
 #             else:
 #                 self.rig.damage_taken - 1
+
 # class Extract:
 #     def __init__(self):
 #         extract_menu = True
@@ -206,6 +220,23 @@ class Scan():
 #                 if ItemTally() encrypter = False
 #                 items.remove(self.Rig.storage)
 #                 items.append(Inventory)
+
+
+class LayLow:
+
+    def __init__(self, active_hacker):
+        hacker = active_hacker
+
+        current_trace = hacker.trace_info.get_trace_level()
+
+        if current_trace <= 0:
+            print(f'{hacker.name}')
+            return
+
+        print(f'{hacker.name} is successfully laying low')
+        new_trace = max(0, current_trace - 2)
+        hacker.trace_info.set_trace_level(new_trace)
+        print(f'Successfully laid low. Trace Level reduced from {current_trace} to {new_trace}.')
 
 #TODO Potentially implement a Black Market for items
 #action_buy = True
