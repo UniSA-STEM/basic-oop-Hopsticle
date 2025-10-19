@@ -38,7 +38,7 @@ def format_item_display(item):
         return item_name
 
 class Hacker:
-    def __init__(self, name=random.choice(names),trace_level_value = 1, inventory=None, ):
+    def __init__(self, name=random.choice(names),trace_level_value = 0, inventory=None, ):
         self.name = name
         self.trace_info = TraceLevel(trace_level_value)
         self.rig = Rig.Rig(name=self.name)
@@ -81,6 +81,11 @@ class TraceLevel:
 
     def increase_trace_level(self):
         self.trace_level += 1
+        self.set_success_chance()
+
+    def decrease_trace_level(self):
+        self.trace_level = max(0, self.trace_level - 1)
+        self.set_success_chance()
 
     def set_success_chance(self):
         success_mult = 1.0
@@ -101,7 +106,7 @@ class TraceLevel:
         is_successful = random_chance <= self.success_chance
 
         self.increase_trace_level()
-        print(f'Successful Action: {self.success_chance} Trace Level Increased: {self.trace_level}' )
+        print(f'Successful Action: {self.success_chance:.2f}% Trace Level Increased: {self.trace_level}' )
         return is_successful
 
     def __repr__(self):
@@ -109,7 +114,7 @@ class TraceLevel:
 
 class Inventory:
     def __init__(self):
-        self.items = [Items.CryptoToken(), Items.CryptoToken(), Items.CryptoToken(), Items.SecurityChip(), Items.SecurityChip(), Items.RemovableDrive()]
+        self.items = [Items.CryptoToken(), Items.CryptoToken(), Items.CryptoToken(), Items.SecurityChip(), Items.SecurityChip(), Items.RemovableDrive(), Items.HardwarePatch()]
 
     def has_item(self, item_class):
         return any(isinstance(item, item_class) for item in self.items)
@@ -126,7 +131,6 @@ class Inventory:
 
         return f'Inventory: {", ".join(display_items)}'
 
-#TODO return the correct actions and include way to exit the menu, implement Lay Low to reduce trace level by 2
 class Actions:
     def __init__(self):
         self.hacker_actions_list = ['1. Attack', '2. Scan', '3. Encrypt', '4. Decrypt', '5. Lay Low']
@@ -173,12 +177,16 @@ class Attack:
                     print('Invalid input. Please enter the number next to the target.')
 
         if target_hacker:
+            print()
             print(f'{self.hacker.name} is attacking {target_hacker.name}...')
 
             if self.hacker.trace_info.successful_action():
                 raw_damage = 1
                 target_hacker.rig.take_damage(raw_damage)
                 print(f'Attack successful against {target_hacker.name}\'s Rig! Damage applied. Item consumed.')
+                if target_hacker.rig.is_broken():
+                    print(
+                        f"\n!!! NETWORK ALERT !!! {target_hacker.name}'s Rig has been CRITICALY DAMAGED and is VULNERABLE to EXPLOIT!")
             else:
                 print('Attack failed, Data Spike lost.')
 
@@ -200,7 +208,7 @@ class Scan:
             print('Scanning for Rigs...')
 
             if not not_scanned_rigs:
-                print('No new Rigs found. Network is fully explored.')
+                print('No new Rigs found. Maybe there aren\'t any more..')
                 return
 
             found_rig = random.choice(not_scanned_rigs)
@@ -213,7 +221,7 @@ class Scan:
         scanned_list = active_hacker.scanned_rigs
 
         if scanned_list:
-            print(f'--- Scanned Rigs Found So Far ({len(scanned_list)}) ---')
+            print(f'\n--- Scanned Rigs Found So Far ({len(scanned_list)}) ---')
             for index, hacker in enumerate(scanned_list, 1):
                 print(f'{index}. {hacker.name}')
         else:
@@ -265,18 +273,19 @@ class Upgrade:
         hacker = active_hacker
         item_class = Items.HardwarePatch
 
-        upgrade_menu = True
-
         if hacker.rig.level >= 3:
             print(f'Upgrade Failed: {hacker.name}\'s Rig is already at maximum level (Level 3).')
-            upgrade_menu = False
+            return
 
-        if upgrade_menu:
-            if hacker.inventory.remove_item(item_class):
-                hacker.rig.level += 1
-                print(f'Upgrade Successful: {hacker.name}\'s Rig is now Level {hacker.rig.level}!')
-            else:
-                print('Upgrade Failed: You need a Hardware Patch in your Inventory.')
+        if not hacker.inventory.remove_item(item_class):
+            print('Upgrade Failed: You need a Hardware Patch in your Inventory.')
+            return
+
+        hacker.rig.level += 1
+
+        hacker.rig.upgrade_storage()
+
+        print(f'Upgrade Successful: {hacker.name}\'s Rig is now Level {hacker.rig.level}!')
 
 
 class Repair:
@@ -312,38 +321,42 @@ class Repair:
 
 
 class Extract:
-    def __init__(self, active_hacker):
-        hacker = active_hacker
+    def __init__(self, active_hacker, target_hacker):
         item_class = Items.RemovableDrive
 
-        extracted_count = 0
-
-        if not hacker.inventory.remove_item(item_class):
-            print('Extract Failed: You need a Removable Drive in your Inventory.')
+        has_item = active_hacker.inventory.has_item(item_class) or active_hacker.rig.has_item_in_storage(item_class)
+        if not has_item:
+            print('Extraction Failed: Requires a Removable Drive in your Inventory or Rig Storage.')
             return
 
-        rig_items = hacker.rig.rig_storage_items
-        items_to_move = []
-        indices_to_replace = []
+        if not target_hacker.rig.is_broken():
+            print(
+                f'Extraction Failed: {target_hacker.name}\'s Rig is not BROKEN (Condition: {target_hacker.rig.rig_condition}).')
+            return
 
-        for index, item in enumerate(rig_items):
-            if not isinstance(item, str) and not getattr(item, 'encrypted', False):
-                items_to_move.append(item)
-                indices_to_replace.append(index)
+        if not (active_hacker.inventory.remove_item(item_class) or active_hacker.rig.consume_item(item_class)):
+            print("Error consuming Removable Drive.")
+            return
 
-        if items_to_move:
-            for item in items_to_move:
-                hacker.inventory.items.append(item)
+        extracted_count = 0
+        extracted_items = []
+
+        for i in range(len(target_hacker.rig.rig_storage_items)):
+            item = target_hacker.rig.rig_storage_items[i]
+
+            if not isinstance(item, str) and item != '*':
+                active_hacker.inventory.add_item(item)
+                extracted_items.append(type(item).__name__)
                 extracted_count += 1
 
-            for index in sorted(indices_to_replace, reverse=True):
-                rig_items.pop(index)
-                rig_items.append('*')
+                target_hacker.rig.rig_storage_items[i] = '*'
 
-            print(f'Extract Successful: Moved {extracted_count} decrypted asset(s) from Rig Storage to Inventory.')
+        if extracted_count > 0:
+            print(
+                f'Extraction Successful! {active_hacker.name} stole {extracted_count} asset(s): {", ".join(extracted_items)} from {target_hacker.name}.')
+
         else:
-            print('Extract Failed: No decrypted items found in Rig Storage to extract.')
-            hacker.inventory.items.append(Items.RemovableDrive())
+            print(f'Extraction Successful, but {target_hacker.name}\'s Rig had no assets to steal.')
 
 
 class LayLow:

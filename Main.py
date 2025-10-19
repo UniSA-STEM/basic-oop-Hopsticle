@@ -33,9 +33,9 @@ def main():
         Hacker.names.remove(chosen_name)
         all_hackers.append(new_hacker)
         print(new_hacker)
-        print()
+        print('*' * 50)
 
-    print(f'Hackers added:\n')
+    print(f'\nHackers added:\n')
     for hacker in all_hackers:
         print(hacker.name)
     print(
@@ -54,6 +54,8 @@ class GameManager():
         self.game_running = True
         self.scanned_hackers = []
         self.trace_info = None
+        self.turn_index = 0
+        self.global_turn = 0
         self.global_round = 1
 
         self.menu_items = ('\n---Menu---'
@@ -63,22 +65,28 @@ class GameManager():
                        '\n4. View Inventory'
                        '\n5. Menu'
                        '\n9. Pass'
-                       '\n10. Exit\n')
+                       '\n10. Exit')
 
     def get_current_hacker(self):
-        self.current_hacker = self.all_hackers[self.turn % self.num_hackers]
+        hacker_index = self.global_turn % self.num_hackers
+        self.current_hacker = self.all_hackers[hacker_index]
         return self.current_hacker
 
-    #TODO ensure that for next hackers turn their Rig is displayed
-    def next_turn(self):
-        self.turn += 1
+    def get_current_round(self):
+        return (self.global_turn // len(self.all_hackers)) + 1
 
+    def next_turn(self):
+        self.global_turn += 1
+
+        next_hacker = self.get_current_hacker()
+        next_hacker.action_points = 1
 
 
     def menu(self, active_hacker):
         print(
             f'*** ROUND {self.global_round} | {active_hacker.name}\'s Turn #{active_hacker.turns_taken + 1}'
-            f' | (AP: {active_hacker.action_points}) ***')
+            f' | Action Points: {active_hacker.action_points}) ***')
+
         print()
         print(self.current_hacker.rig)
         print(self.menu_items)
@@ -135,27 +143,35 @@ class GameManager():
 
         if action_menu_choice == 'attack' or action_menu_choice == '1':
             Hacker.Attack(active_hacker)
+            return
 
         elif action_menu_choice == 'scan' or action_menu_choice == '2':
             Hacker.Scan(active_hacker, all_hackers)
+            return
 
         elif action_menu_choice == 'encrypt' or action_menu_choice == '3':
             Hacker.Encrypt(active_hacker)
+            return
 
         elif action_menu_choice == 'decrypt' or action_menu_choice == '4':
             Hacker.Decrypt(active_hacker)
+            return
 
         elif action_menu_choice == 'lay low' or action_menu_choice == '5':
             Hacker.LayLow(active_hacker)
+            return
 
         elif action_menu_choice == 'extract' or action_menu_choice == '6':
             Hacker.Extract(active_hacker)
+            return
 
         elif action_menu_choice == 'upgrade' or action_menu_choice == '7':
             Hacker.Upgrade(active_hacker)
+            return
 
         elif action_menu_choice == 'repair' or action_menu_choice == '8':
             Hacker.Repair(active_hacker)
+            return
 
         else:
             print(f'Action {action_menu_choice} not found')
@@ -165,12 +181,20 @@ class GameManager():
 
         while self.game_running:
             active_hacker = self.get_current_hacker()
+            current_round = self.get_current_round()
+
+            if current_round > 1:
+                active_hacker.rig.generate_new_item()
+
             self.menu(active_hacker)
 
             if self.game_running:
+
+                if not hasattr(active_hacker, 'turns_taken'):
+                    active_hacker.turns_taken = 0
+                active_hacker.turns_taken += 1
+
                 self.next_turn()
-                self.turn_display = (self.turn // 3) + 1
-                print(f'{active_hacker.name: active_hacker.action_points}\'s Turn')
 
 if __name__ == '__main__':
     game_info()
