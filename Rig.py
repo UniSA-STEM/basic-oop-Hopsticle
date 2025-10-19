@@ -7,9 +7,11 @@ Username: corjy027
 This is my own work as defined by the University's Academic Misconduct Policy.
 """
 
-
 # import Asset
 import random
+
+import Items
+
 
 def load_assets(filename='Asset List'):
     try:
@@ -19,49 +21,64 @@ def load_assets(filename='Asset List'):
         print('No Assets Found.')
         return []
 
+
 items = load_assets()
 
+
 class Rig:
-    def __init__(self, name=None,damage=0, level=None):
+    def __init__(self, name=None, level=1):
         self.name = name
-        self.damage = damage
+        self.damage = 0
         self.level = level
 
-        self.rig_storage = Storage(self.level)
+        self.rig_storage_items = []
+
+        self.set_default_rig_storage()
+        self.rig_storage_capacity = Storage(self.level)
         self.rig_condition = Condition(self.damage)
         self.rig_broken_status = Broken_Status(self.damage)
+
+    def set_default_rig_storage(self):
+        self.rig_storage_items = [Items.DataSpike(), Items.DataSpike(), Items.RemovableDrive(), '*', '*']
+
+    def get_current_rig_storage(self):
+        return self.rig_storage_items
 
     def __str__(self):
         return (f'Rig: {self.name} | Level: {self.level} | Damage Taken: {self.damage}'
                 f'| Condition: {self.rig_condition}| Broken: {self.rig_broken_status}'
-                f'\n{self.rig_storage}')
+                f'\n{self.get_current_rig_storage()}')
 
 
 class Storage:
     def __init__(self, level):
         if level == 1:
-            self.storage = ['*', '*']
-        if level == 2:
-            self.storage = ['*', '*', '*', '*']
+            self.max_capacity = 5
+        elif level == 2:
+            self.max_capacity = 7
+        elif level == 3:
+            self.max_capacity = 9
         else:
-            self.storage = ['*', '*', '*', '*', '*', '*']
+            self.max_capacity = 0
+
+    def get_max_capacity(self):
+        return self.max_capacity
 
     def __repr__(self):
-        return f'Storage: {self.storage}'
+        return f'Capacity: {self.get_max_capacity()} slots'
 
 
 class Condition:
     def __init__(self, damage):
-        if damage >= 5:
-            self.condition = 'FUBAR'
-        elif damage == 4:
-            self.condition = 'Blue Screening'
-        elif damage == 3:
-            self.condition = ''
-        elif damage == 2:
-            self.condition = 'OK'
-        elif damage == 1:
-            self.condition = 'PSA 8'
+
+        if damage >= 3:
+            self.condition = 'Blue Screen'
+        elif damage > 2:
+            self.condition = 'Laggy'
+        elif damage > 1:
+            self.condition = 'OK Performance'
+        elif damage > 0:
+            self.condition = 'Running Great'
         elif damage == 0:
             self.condition = 'Gem Mint'
         else:
@@ -70,13 +87,48 @@ class Condition:
     def __str__(self):
         return f'{self.condition}'
 
+#TODO Initialise a way to calculate damage based on current level
+class Calculate_Damage:
+    def __init__(self, damage):
+        pass
+
+
+#TODO ensure damage taken is accurately reflected
+class Damage_Taken:
+    def __init__(self, damage, level):
+        self.damage = damage
+        self.level = level
+        self.damage_taken = 0
+
+        if level == 1:
+            self.damage_taken = 1
+        if level == 2:
+            self.damage_taken = .75
+        if level == 3:
+            self.damage_taken = .6
+
+    def __str__(self):
+        self.damage = self.damage + self.damage_taken
+        return (f'{self.damage_taken} Damage Taken, currently on {self.damage} Total Damage Taken ')
+
 
 class Broken_Status:
     def __init__(self, damage):
-        if damage >= 5:
+        if damage >= 3:
             self.broken_status = True
         else:
             self.broken_status = False
 
     def __str__(self):
         return str(self.broken_status)
+
+'''
+# test = Rig()
+# print(test)
+# test.damage = Damage_Taken(0, 2)
+# total_damage = test.damage and test.damage
+# print(test.damage)
+# print(test.damage)
+#
+# print(test)
+'''
