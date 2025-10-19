@@ -1,11 +1,11 @@
-'''
+"""
 File: Hacker.py
-Description: This module contains the actions permittable by the Hacker class and it's associated links.
+Description: This module contains the actions permittable by the Hacker class along with it's associated links.
 Author: Joshua Cordner
 ID: corjy027
 Username: corjy027
 This is my own work as defined by the University's Academic Misconduct Policy.
-'''
+"""
 
 import random
 import Items

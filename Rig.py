@@ -7,9 +7,7 @@ Username: corjy027
 This is my own work as defined by the University's Academic Misconduct Policy.
 """
 
-# import Asset
 import random
-
 import Items
 
 

@@ -1,5 +1,5 @@
 """
-File: main.py
+File: Main.py
 Description: The module containing the main running of the project.
 Author: Joshua Cordner
 ID: corjy027
@@ -7,14 +7,13 @@ Username: corjy027
 This is my own work as defined by the University's Academic Misconduct Policy.
 """
 
-import time
 import random
 import Items
 import Hacker
-import Rig
 all_hackers = []
 
 def game_info():
+    print()
     print('Welcome to Cyber-Scape!'
           '\nThis is a Battleground where Hackers are pitted against one another to steal assets and '
           'destroy one another to rise to the top.'
@@ -23,7 +22,6 @@ def game_info():
 def main():
 
     default_level_instance = Hacker.TraceLevel()
-    hacker_success_chance = default_level_instance.get_success_chance()
     hacker_number = input('How many Hackers will there be? ')
     print()
 
@@ -100,7 +98,7 @@ class GameManager():
             elif menu_choice == 2:
                 self.items_menu()
             elif menu_choice == 3:
-                Hacker.Scan.found_rigs(self)
+                Hacker.Scan().found_rigs(active_hacker)
             elif menu_choice == 4:
                 print(f"--- {active_hacker.name}'s Inventory & Rig Storage ---")
                 print(active_hacker.inventory)
@@ -118,7 +116,6 @@ class GameManager():
             elif menu_choice == 10:
                 self.game_running = False
 
-    #TODO change so that encrypted status only shows when hacker is looking at storage or inventory
     def items_menu(self):
         print(*Items.load_items(),sep=', ')
         item_input = input('Which item would you like information on? ')
