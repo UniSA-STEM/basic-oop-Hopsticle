@@ -112,7 +112,7 @@ class TraceLevel:
 
 class Inventory:
     def __init__(self):
-        self.items = [Items.CryptoToken(), Items.CryptoToken(), Items.CryptoToken(), Items.SecurityChip(), Items.SecurityChip(), Items.RemovableDrive(), Items.HardwarePatch()]
+        self.items = [Items.CryptoToken()]
 
     def has_item(self, item_class):
         return any(isinstance(item, item_class) for item in self.items)

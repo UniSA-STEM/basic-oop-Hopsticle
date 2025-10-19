@@ -30,8 +30,10 @@ def main():
         chosen_name = new_hacker.name
         Hacker.names.remove(chosen_name)
         all_hackers.append(new_hacker)
+        print('*' * 50)
         print(new_hacker)
         print('*' * 50)
+        print()
 
     print(f'\nHackers added:\n')
     for hacker in all_hackers:
@@ -83,7 +85,7 @@ class GameManager():
     def menu(self, active_hacker):
         print(
             f'*** ROUND {self.global_round} | {active_hacker.name}\'s Turn #{active_hacker.turns_taken + 1}'
-            f' | Action Points: {active_hacker.action_points}) ***')
+            f' | Action Points: {active_hacker.action_points} ***')
 
         print()
         print(self.current_hacker.rig)

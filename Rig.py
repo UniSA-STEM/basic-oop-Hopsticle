@@ -26,7 +26,7 @@ items = load_assets()
 class Rig:
     def __init__(self, name=None, level=1):
         self.name = name
-        self.damage = 2.9
+        self.damage = 0.0
         self.level = level
 
         self.rig_storage_items = []
