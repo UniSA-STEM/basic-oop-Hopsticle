@@ -12,6 +12,7 @@ import Items
 
 
 def load_assets(filename='Usable Items'):
+#Load list of possible items from txt file
     try:
         with open(filename, 'r') as file:
             return file.read().splitlines()
@@ -19,72 +20,73 @@ def load_assets(filename='Usable Items'):
         print('No Assets Found.')
         return []
 
-
 items = load_assets()
 
-
 class Rig:
+    """Contains Rig parameters"""
     def __init__(self, name=None, level=1):
-        self.name = name
-        self.damage = 0.0
-        self.level = level
-
-        self.rig_storage_items = []
-
-        self.set_default_rig_storage()
-        self.rig_storage_capacity_instance = Storage(self.level)
-        self.rig_storage_capacity = self.rig_storage_capacity_instance.get_max_capacity()
+        self.name = name                                                                    #Holds Rig Name
+        self.damage = 0.0                                                                   #Default Damage Value
+        self.level = level                                                                  #Default Rig Level
+        self.rig_storage_items = []                                                         #Starging Items
+        self.set_default_rig_storage()                                                      #
+        self.rig_storage_capacity_instance = Storage(self.level)                            #Provides instance for storage movements
+        self.rig_storage_capacity = self.rig_storage_capacity_instance.get_max_capacity()   #Ensures cap for rig items
         self.rig_condition = Condition(self.damage)
-        self.rig_broken_status = BrokenStatus(self.damage)
+        self.rig_broken_status = BrokenStatus(self.damage)                                  #Holds is rig is broken
 
     def generate_new_item(self):
         if not items:
-            print(f"[{self.name}'s Rig] cannot generate item: Asset list is empty.")
+            print(f'{self.name}\'s Rig cannot generate item: Asset list is empty.')
             return False
 
+        #Set condition that new item can only be generated for an empty inventory space
         if '*' in self.rig_storage_items:
             random_asset_name = random.choice(items)
-
             try:
                 ItemClass = getattr(Items, random_asset_name)
                 new_item = ItemClass()
-            except AttributeError:
-                print(
-                    f"[{self.name}'s Rig] failed to generate item: Class '{random_asset_name}' not found in Items module.")
-                return False
 
+            except AttributeError:
+                print(f'{self.name}\'s Rig failed to generate item: Class "{random_asset_name}" not found in Items module.')
+                return False
             try:
+            #If an empty space is found change index to random item
                 empty_index = self.rig_storage_items.index('*')
                 self.rig_storage_items[empty_index] = new_item
-                print(f"[{self.name}'s Rig] generated a new asset: {random_asset_name}.")
+                print(f'{self.name}\'s Rig generated a new asset: {random_asset_name}.')
                 return True
+
             except ValueError:
                 return False
         else:
-            print(f"[{self.name}'s Rig] storage is full. No item generated.")
+            print(f'{self.name}\'s Rig storage is full. No item generated.')
             return False
 
     def has_item_in_storage(self, item_class):
+    #Holds condition for the storage holding usable item
         return any(isinstance(item, item_class) for item in self.rig_storage_items)
 
     def consume_item(self, item_class):
+    #Run when item is used from inventory
         for used_item, item in enumerate(self.rig_storage_items):
-
             if isinstance(item, item_class):
+                #Remove item used
                 self.rig_storage_items.pop(used_item)
+                #Insert Empty Slow
                 self.rig_storage_items.append('*')
                 return True
         return False
 
     def take_damage(self, raw_damage=1):
+        #Used to calculate damage taken comparing incoming damage to reduction multiplier
         damage_reduction = DamageReduction(self.level)
-
         effective_damage = raw_damage * damage_reduction.damage_multiplier
         self.damage += effective_damage
-
         self.update_status()
 
     def repair_damage(self, amount=1):
+        #Repair will remove 1 point of damage
         self.damage = max(0.0, self.damage - amount)
         self.update_status()
 
@@ -93,25 +95,26 @@ class Rig:
         self.rig_broken_status = BrokenStatus(self.damage)
 
     def set_default_rig_storage(self):
+        #Set the default items when a rig is created
         self.rig_storage_items = [Items.DataSpike(), Items.DataSpike(), Items.RemovableDrive(), '*', '*']
 
     def get_current_rig_storage(self):
+        #Get default rig items
         return self.rig_storage_items
 
     def upgrade_storage(self):
+        #Used to increase the displayed rig storage
         old_capacity = self.rig_storage_capacity
-
         self.rig_storage_capacity_instance = Storage(self.level)
         self.rig_storage_capacity = self.rig_storage_capacity_instance.get_max_capacity()
-
         new_slots = self.rig_storage_capacity - old_capacity
 
         if new_slots > 0:
             self.rig_storage_items.extend(['*'] * new_slots)
             print(
-                f"Rig storage increased from {old_capacity} to {self.rig_storage_capacity} slots. Gained {new_slots} new slots.")
+                f'Rig storage increased from {old_capacity} to {self.rig_storage_capacity} slots. Gained {new_slots} new slots.')
         else:
-            print("Rig storage capacity did not change (or is maxed).")
+            print('Rig storage capacity did not change (or is maxed).')
 
     def __str__(self):
         storage_display = self.format_storage_display()
@@ -131,19 +134,18 @@ class Rig:
                 continue
 
             item_name = type(item).__name__
-
             is_encrypted = getattr(item, 'encrypted', False)
-
             if is_encrypted:
                 display_list.append(f'{item_name} (*)')
             else:
                 display_list.append(item_name)
-
         return ', '.join(display_list)
 
-#TODO ensure max storage is increased and appended when level increases
 class Storage:
+    """Holds Storage functions"""
     def __init__(self, level):
+        
+        #Used to determine maximum storage capacity based on level
         if level == 1:
             self.max_capacity = 5
         elif level == 2:
@@ -161,6 +163,7 @@ class Storage:
 
 
 class Condition:
+    """Holds and returns Condition based on damage received"""
     def __init__(self, damage):
 
         if damage >= 3:
@@ -180,6 +183,7 @@ class Condition:
         return f'{self.condition}'
 
 class DamageReduction:
+    """Holds determination for damage taken from hit based on rig level"""
     def __init__(self, level):
         self.level = level
 
@@ -190,8 +194,8 @@ class DamageReduction:
         elif level == 3:
             self.damage_multiplier = .6
 
-
 class BrokenStatus:
+    """Set broken condition once 3 damage has been sustained"""
     def __init__(self, damage):
         if damage >= 3:
             self.broken_status = True
