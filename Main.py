@@ -16,7 +16,7 @@ all_hackers = []
 
 def game_info():
     print('Welcome to Cyber-Scape!'
-          '\nThis is a Battleground where Hackers are pitted against one another to steal assets and'
+          '\nThis is a Battleground where Hackers are pitted against one another to steal assets and '
           'destroy one another to rise to the top.'
           '\nAre you up the the Challenge?!\n')
 
@@ -49,11 +49,21 @@ class GameManager():
     def __init__(self, all_hackers):
         self.all_hackers = all_hackers
         self.num_hackers = len(self.all_hackers)
-        self.turn = 0
+        self.turn = 1
         self.current_hacker = None
         self.game_running = True
         self.scanned_hackers = []
         self.trace_info = None
+        self.global_round = 1
+
+        self.menu_items = ('\n---Menu---'
+                       '\n1. Hacker Actions'
+                       '\n2. Items'
+                       '\n3. Hackers'
+                       '\n4. Rig Inventory'
+                       '\n5. Menu'
+                       '\n9. Pass'
+                       '\n10. Exit\n')
 
     def get_current_hacker(self):
         self.current_hacker = self.all_hackers[self.turn % self.num_hackers]
@@ -63,27 +73,32 @@ class GameManager():
     def next_turn(self):
         self.turn += 1
 
+
+
     def menu(self, active_hacker):
-        print(f'** It is currently {active_hacker.name}\'s turn **')
+        print(
+            f'*** ROUND {self.global_round} | {active_hacker.name}\'s Turn #{active_hacker.turns_taken + 1}'
+            f' | (AP: {active_hacker.action_points})***')
+        print()
         print(self.current_hacker.rig)
-        print('\n---Menu---'
-              '\n1. Hacker Actions'
-              '\n2. Items'
-              '\n3. Hackers'
-              '\n4. Rig Inventory'
-              '\n10. Exit\n')
+        print(self.menu_items)
 
         while self.game_running is True:
-            menu_choice = int(input('What menu would you like to explore? '))
+            menu_choice = int(input('What menu would you like to explore? (5 for menu options) '))
             print()
             if menu_choice == 1:
                 self.actions_menu(self.get_current_hacker())
             elif menu_choice == 2:
                 self.items_menu()
             elif menu_choice == 3:
-                Hacker.Scan.found_hackers(self)
+                Hacker.Scan.found_rigs(self)
             elif menu_choice == 4:
-                self.current_hacker.rig
+                print(self.current_hacker.rig.get_current_rig_storage())
+            elif menu_choice == 5:
+                print(self.menu_items)
+            elif menu_choice == 9:
+                print(f'{active_hacker.name} is passing their turn.')
+                return
             elif menu_choice == 10:
                 self.game_running = False
 
@@ -147,12 +162,12 @@ class GameManager():
 
         while self.game_running:
             active_hacker = self.get_current_hacker()
-
+            active_hacker.reset_action_points()
             self.menu(active_hacker)
 
             if self.game_running:
                 self.next_turn()
-
+                self.turn_display = (self.turn // 3) + 1
 
 if __name__ == '__main__':
     game_info()

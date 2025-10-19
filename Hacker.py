@@ -1,6 +1,6 @@
 '''
 File: Hacker.py
-Description: This module contains the actions permitable by the Hacker class and it's associated links.
+Description: This module contains the actions permittable by the Hacker class and it's associated links.
 Author: Joshua Cordner
 ID: corjy027
 Username: corjy027
@@ -29,17 +29,27 @@ class ActionCounter:
         counter = 0
 
 class Hacker:
-    def __init__(self, name=random.choice(names),trace_level_value = 5, inventory=None, ):
+    def __init__(self, name=random.choice(names),trace_level_value = 0, inventory=None, ):
         self.name = name
         self.trace_info = TraceLevel(trace_level_value)
         self.rig = Rig.Rig(name=self.name)
-
-        self.scanned_hackers = []
+        self.turns_taken = 0
+        self.scanned_rigs = []
+        self.action_points = 1
 
         if inventory is None:
             self.inventory = Inventory()
         else:
             self.inventory = inventory
+
+    def consume_item(self, item_class):
+        if self.inventory.remove_item(item_class):
+            return True
+
+        if self.rig.consume_item(item_class):
+            return True
+
+        return False
 
     def __str__(self):
         return (f'Hacker: {self.name} | {self.trace_info}'
@@ -98,10 +108,10 @@ class Inventory:
         return any(isinstance(item, item_class) for item in self.items)
 
     def remove_item(self, item_class):
-        for i, item in enumerate(self.items):
+        for used_item, item in enumerate(self.items):
 
             if isinstance(item, item_class):
-                self.items.pop(i)
+                self.items.pop(used_item)
                 return True
         return False
 
@@ -129,96 +139,84 @@ class Attack:
     def __init__(self, active_hacker):
         self.hacker = active_hacker
         scanned_list = self.hacker.scanned_rigs
+        item_class = Items.DataSpike
 
         selection_complete = False
         target_hacker = None
 
-        has_spike_in_inventory = self.hacker.inventory.has_item(Items.DataSpike)
-        has_spike_in_rig = any(isinstance(item, Items.DataSpike) for item in self.hacker.rig.rig_storage_items)
+        has_item = self.hacker.inventory.has_item(item_class) or self.hacker.rig.has_item_in_storage(item_class)
 
-        if not (has_spike_in_inventory or has_spike_in_rig):
+        if not has_item:
             print('You need a Data Spike to attack.')
             selection_complete = True
-
         elif not scanned_list:
             print('Cannot attack: No rigs have been scanned yet. Use the "Scan" action first.')
             selection_complete = True
 
         while not selection_complete:
             Scan().found_rigs(self.hacker)
-
             attack_choice = input('Who will you attack? (Enter number, "x" to cancel): ').lower().strip()
 
             if attack_choice == 'x':
                 print('Attack cancelled.')
                 selection_complete = True
-                continue
-
-            try:
-                target_index = int(attack_choice)
-            except ValueError:
-                print('Invalid input. Please enter the number next to the target.')
-                continue
-
-            if 1 <= target_index <= len(scanned_list):
-                target_hacker = scanned_list[target_index - 1]
-                selection_complete = True
             else:
-                print(f'Invalid selection. Please choose a number between 1 and {len(scanned_list)}.')
-                continue
+                try:
+                    target_index = int(attack_choice)
+                    if 1 <= target_index <= len(scanned_list):
+                        target_hacker = scanned_list[target_index - 1]
+                        selection_complete = True
+                    else:
+                        print(f'Invalid selection. Please choose a number between 1 and {len(scanned_list)}.')
+                except ValueError:
+                    print('Invalid input. Please enter the number next to the target.')
 
         if target_hacker:
             print(f'{self.hacker.name} is attacking {target_hacker.name}...')
 
             if self.hacker.trace_info.successful_action():
-
                 raw_damage = 1
                 target_hacker.rig.take_damage(raw_damage)
-
                 print(f'Attack successful against {target_hacker.name}\'s Rig! Damage applied. Item consumed.')
             else:
                 print('Attack failed, Data Spike lost.')
 
-            removed = self.hacker.inventory.remove_item(Items.DataSpike)
+            self.hacker.consume_item(item_class)
 
-            if not removed:
-                for i, item in enumerate(self.hacker.rig.rig_storage_items):
-                    if isinstance(item, Items.DataSpike):
-                        self.hacker.rig.rig_storage_items.pop(i)
-                        break
 
-class Scan():
-    def __init__(self, active_hacker, all_hackers):
-        hacker = active_hacker
+class Scan:
+    def __init__(self, active_hacker=None, all_hackers=None):
+        if active_hacker and all_hackers:
+            hacker = active_hacker
 
-        not_scanned_hackers = [
-            target
-            for target in all_hackers
-            if target.name != hacker.name  # Exclude self
-               and target.name not in [s.name for s in hacker.scanned_hackers]
-        ]
+            not_scanned_rigs = [
+                target
+                for target in all_hackers
+                if target.name != hacker.name
+                   and target.name not in [r.name for r in hacker.scanned_rigs]
+            ]
 
-        print(f'Scanning for Rigs...')
+            print('Scanning for Rigs...')
 
-        if not not_scanned_hackers:
-            print('No new Rigs found. Network is fully explored.')
-            return
+            if not not_scanned_rigs:
+                print('No new Rigs found. Network is fully explored.')
+                return
 
-        found_rig = random.choice(not_scanned_hackers)
-        hacker.scanned_hackers.append(found_rig)
+            found_rig = random.choice(not_scanned_rigs)
+            hacker.scanned_rigs.append(found_rig)
 
-        print(f'Rig found: {found_rig.name}')
-        self.found_rigs(hacker)
+            print(f'Rig found: {found_rig.name}')
+            self.found_rigs(hacker)
 
     def found_rigs(self, active_hacker):
-        scanned_list = active_hacker.scanned_hackers
+        scanned_list = active_hacker.scanned_rigs
 
         if scanned_list:
-            print(f'--- Rigs Found So Far ({len(scanned_list)}) ---')
+            print(f'--- Scanned Rigs Found So Far ({len(scanned_list)}) ---')
             for index, hacker in enumerate(scanned_list, 1):
                 print(f'{index}. {hacker.name}')
         else:
-            print('No Hackers found yet.')
+            print('No Rigs found yet.')
 
 #TODO Initialise the remainder og the actions
 # class Decrypt:
@@ -241,7 +239,7 @@ class Scan():
 #     def __init__(self):
 #         upgrade_menu = True
 #         while upgrade_menu is True:
-#             if self.rig.level >= 3:
+#             if self.rig.level >= 3:0
 #                 print('You cannot upgrade further')
 #             else:
 #                 self.rig.level = self.rig.level + 1

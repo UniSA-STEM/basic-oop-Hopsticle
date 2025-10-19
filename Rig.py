@@ -28,7 +28,7 @@ items = load_assets()
 class Rig:
     def __init__(self, name=None, level=1):
         self.name = name
-        self.damage = 2
+        self.damage = 0.0
         self.level = level
 
         self.rig_storage_items = []
@@ -38,12 +38,28 @@ class Rig:
         self.rig_condition = Condition(self.damage)
         self.rig_broken_status = BrokenStatus(self.damage)
 
-    def take_damage(self, amount=1):
-        self.damage += amount
+    def has_item_in_storage(self, item_class):
+        return any(isinstance(item, item_class) for item in self.rig_storage_items)
+
+    def consume_item(self, item_class):
+        for used_item, item in enumerate(self.rig_storage_items):
+
+            if isinstance(item, item_class):
+                self.rig_storage_items.pop(used_item)
+                self.rig_storage_items.append('*')
+                return True
+        return False
+
+    def take_damage(self, raw_damage=1):
+        damage_reduction = DamageReduction(self.level)
+
+        effective_damage = raw_damage * damage_reduction.damage_multiplier
+        self.damage += effective_damage
+
         self.update_status()
 
     def repair_damage(self, amount=1):
-        self.damage = max(0, self.damage - amount)
+        self.damage = max(0.0, self.damage - amount)
         self.update_status()
 
     def update_status(self):
@@ -57,9 +73,9 @@ class Rig:
         return self.rig_storage_items
 
     def __str__(self):
-        return (f'Rig: {self.name} | Level: {self.level} | Damage Taken: {self.damage}'
+        return (  f'Rig:     {self.name}\'s | Level: {self.level} | Damage Taken: {self.damage}'
                 f'| Condition: {self.rig_condition}| Broken: {self.rig_broken_status}'
-                f'\n{self.get_current_rig_storage()}')
+                f'\nStorage: {self.get_current_rig_storage()}')
 
 
 class Storage:
@@ -91,7 +107,7 @@ class Condition:
             self.condition = 'OK Performance'
         elif damage > 0:
             self.condition = 'Running Great'
-        elif damage == 0:
+        elif damage == 0.0:
             self.condition = 'Gem Mint'
         else:
             self.condition = 'Unknown'
@@ -100,31 +116,19 @@ class Condition:
         return f'{self.condition}'
 
 #TODO Initialise a way to calculate damage based on current level
-class CalculateDamage:
-    def __init__(self, damage):
-        pass
 
 
 #TODO ensure damage taken is accurately reflected
 class DamageReduction:
     def __init__(self, level):
         self.level = level
-        self.damage_taken = 0
 
         if level == 1:
-            self.damage_taken = 1
-        if level == 2:
-            self.damage_taken = .75
-        if level == 3:
-            self.damage_taken = .6
-
-    @property
-    def damage_multiplier(self):
-        return self._damage_multiplier
-
-    @damage_multiplier.setter
-    def damage_multiplier(self, value):
-        self._damage_multiplier = value
+            self.damage_multiplier = 1
+        elif level == 2:
+            self.damage_multiplier = .75
+        elif level == 3:
+            self.damage_multiplier = .6
 
 
 class BrokenStatus:
@@ -136,14 +140,3 @@ class BrokenStatus:
 
     def __str__(self):
         return str(self.broken_status)
-
-'''
-# test = Rig()
-# print(test)
-# test.damage = Damage_Taken(0, 2)
-# total_damage = test.damage and test.damage
-# print(test.damage)
-# print(test.damage)
-#
-# print(test)
-'''
