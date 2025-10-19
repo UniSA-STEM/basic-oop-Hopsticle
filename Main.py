@@ -23,6 +23,7 @@ def game_info():
 def main():
 
     default_level_instance = Hacker.TraceLevel()
+    hacker_success_chance = default_level_instance.get_success_chance()
     hacker_number = input('How many Hackers will there be? ')
     print()
 
@@ -52,6 +53,7 @@ class GameManager():
         self.current_hacker = None
         self.game_running = True
         self.scanned_hackers = []
+        self.trace_info = None
 
     def get_current_hacker(self):
         self.current_hacker = self.all_hackers[self.turn % self.num_hackers]
@@ -67,8 +69,8 @@ class GameManager():
         print('\n---Menu---'
               '\n1. Hacker Actions'
               '\n2. Items'
-              #TODO implement tig actions alongside normal actions
               '\n3. Hackers'
+              '\n4. Rig Inventory'
               '\n10. Exit\n')
 
         while self.game_running is True:
@@ -80,6 +82,8 @@ class GameManager():
                 self.items_menu()
             elif menu_choice == 3:
                 Hacker.Scan.found_hackers(self)
+            elif menu_choice == 4:
+                self.current_hacker.rig
             elif menu_choice == 10:
                 self.game_running = False
 
@@ -103,12 +107,13 @@ class GameManager():
         actions_instance = Hacker.Actions()
         print(actions_instance.get_list_actions(),sep= ', ')
         print()
+        print(f'Current Success Chance: {self.current_hacker.trace_info.get_success_chance():.2f}%')
         action_menu_choice = input('What action will you take? ')
+
 
         if action_menu_choice == 'attack' or action_menu_choice == '1':
 
-            Hacker.Scan.found_hackers()
-            attack_target = input('Who is your attack target?')
+            Hacker.Scan.found_rigs()
 
             #TODO Print list of attack targets based on found rigs from scan, have user select rig to deal damage
             Hacker.Attack(active_hacker)

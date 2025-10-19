@@ -1,11 +1,11 @@
-"""
+'''
 File: Hacker.py
 Description: This module contains the actions permitable by the Hacker class and it's associated links.
 Author: Joshua Cordner
 ID: corjy027
 Username: corjy027
 This is my own work as defined by the University's Academic Misconduct Policy.
-"""
+'''
 
 import random
 import Items
@@ -108,7 +108,7 @@ class Inventory:
 
     def __str__(self):
         item_names = [item.__class__.__name__ for item in self.items]
-        return f'Inventory: {", ".join(item_names)}'
+        return f'Inventory: {', '.join(item_names)}'
 
 #TODO return the correct actions and include way to exit the menu, implement Lay Low to reduce trace level by 2
 class Actions:
@@ -127,18 +127,54 @@ class Actions:
 
 #TODO Complete attack and damage calculation integration
 class Attack:
-    def __init__(self, active_hacker, target_hacker):
+    def __init__(self, active_hacker):
         hacker = active_hacker
+        scanned_list = hacker.scanned_hackers
+
+        selection_complete = False
+        target_hacker = None
+
         if not hacker.inventory.has_item(Items.DataSpike):
             print('You need a Data Spike to attack.')
-            return
+            selection_complete = True
 
-        if hacker.trace_info.successful_action():
-            print(f"Attack successful against {target_hacker.name}'s Rig!")
-        else:
-            print('Attack failed, Data Spike lost.')
+        elif not scanned_list:
+            print('Cannot attack: No rigs have been scanned yet. Use the "Scan" action first.')
+            selection_complete = True
 
-        hacker.inventory.remove_item(Items.DataSpike)
+        while not selection_complete:
+            Scan().found_rigs(hacker)
+
+            attack_choice = input('Who will you attack? (Enter number, "x" to cancel): ').lower().strip()
+
+            if attack_choice == 'x':
+                print('Attack cancelled.')
+                selection_complete = True
+                continue
+
+            try:
+                target_index = int(attack_choice)
+            except ValueError:
+                print('Invalid input. Please enter the number next to the target.')
+                continue
+
+            if 1 <= target_index <= len(scanned_list):
+                target_hacker = scanned_list[target_index - 1]
+                selection_complete = True
+            else:
+                print(f'Invalid selection. Please choose a number between 1 and {len(scanned_list)}.')
+                continue
+
+        if target_hacker:
+            print(f'{hacker.name} is preparing to attack {target_hacker.name}...')
+
+            if hacker.trace_info.successful_action():
+
+                print(f'Attack successful against {target_hacker.name}\'s Rig! Item consumed.')
+            else:
+                print('Attack failed, Data Spike lost.')
+
+            hacker.inventory.remove_item(Items.DataSpike)
 
 class Scan():
     def __init__(self, active_hacker, all_hackers):
@@ -161,15 +197,15 @@ class Scan():
         hacker.scanned_hackers.append(found_rig)
 
         print(f'Rig found: {found_rig.name}')
-        self.found_hackers(hacker)
+        self.found_rigs(hacker)
 
-    def found_hackers(self, active_hacker):
+    def found_rigs(self, active_hacker):
         scanned_list = active_hacker.scanned_hackers
 
         if scanned_list:
-            print(f'Scanned Hackers Found So Far ({len(scanned_list)}):')
-            for hacker in scanned_list:
-                print(f'- {hacker.name}')
+            print(f'--- Rigs Found So Far ({len(scanned_list)}) ---')
+            for index, hacker in enumerate(scanned_list, 1):
+                print(f'{index}. {hacker.name}')
         else:
             print('No Hackers found yet.')
 
