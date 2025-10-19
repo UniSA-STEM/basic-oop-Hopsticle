@@ -1,5 +1,5 @@
 """
-File: main.py
+File: Main.py
 Description: The module containing the main running of the project.
 Author: Joshua Cordner
 ID: corjy027
@@ -7,20 +7,20 @@ Username: corjy027
 This is my own work as defined by the University's Academic Misconduct Policy.
 """
 
-
 import random
 import Items
 import Hacker
-
 all_hackers = []
 
 def game_info():
+    print()
     print('Welcome to Cyber-Scape!'
-          '\nThis is a Battleground where Hackers are pitted against one another to steal assets and'
-          'destroy Rigs to rise to the top.'
+          '\nThis is a Battleground where Hackers are pitted against one another to steal assets and '
+          'destroy one another to rise to the top.'
           '\nAre you up the the Challenge?!\n')
 
 def main():
+
     default_level_instance = Hacker.TraceLevel()
     hacker_number = input('How many Hackers will there be? ')
     print()
@@ -30,10 +30,12 @@ def main():
         chosen_name = new_hacker.name
         Hacker.names.remove(chosen_name)
         all_hackers.append(new_hacker)
+        print('*' * 50)
         print(new_hacker)
+        print('*' * 50)
         print()
 
-    print(f'Hackers added:\n')
+    print(f'\nHackers added:\n')
     for hacker in all_hackers:
         print(hacker.name)
     print(
@@ -47,58 +49,78 @@ class GameManager():
     def __init__(self, all_hackers):
         self.all_hackers = all_hackers
         self.num_hackers = len(self.all_hackers)
-        self.turn = 0
+        self.turn = 1
         self.current_hacker = None
         self.game_running = True
-        self.scanned_rigs = []
-        self.available_action_points = Hacker.ActionTracker()
+        self.scanned_hackers = []
+        self.trace_info = None
+        self.turn_index = 0
+        self.global_turn = 0
+        self.global_round = 1
 
-    def hacker_list(self):
-        return self.all_hackers
+        self.menu_items = ('\n---Menu---'
+                       '\n1. Hacker Actions'
+                       '\n2. Items'
+                       '\n3. Hackers'
+                       '\n4. View Inventory'
+                       '\n5. Menu'
+                       '\n9. Pass'
+                       '\n10. Exit')
 
     def get_current_hacker(self):
-        self.current_hacker = self.all_hackers[self.turn % self.num_hackers]
+        hacker_index = self.global_turn % self.num_hackers
+        self.current_hacker = self.all_hackers[hacker_index]
         return self.current_hacker
 
+    def get_current_round(self):
+        return (self.global_turn // len(self.all_hackers)) + 1
+
     def next_turn(self):
-        self.turn += 1
+        self.global_turn += 1
+
+        next_hacker = self.get_current_hacker()
+        next_hacker.action_points = 1
+
 
     def menu(self, active_hacker):
-        print(f'** It is currently {active_hacker.name}\'s turn ** | {self.available_action_points.available_points()} Actions Remaining')
+        print(
+            f'*** ROUND {self.global_round} | {active_hacker.name}\'s Turn #{active_hacker.turns_taken + 1}'
+            f' | Action Points: {active_hacker.action_points} ***')
+
+        print()
         print(self.current_hacker.rig)
-        print('\n---Menu---'
-              '\n1. Hacker Actions'
-              '\n2. Items'
-              '\n3. Found Rigs'
-              '\n4. Pass Turn'
-              '\n10. Exit\n')
+        print(self.menu_items)
 
         while self.game_running is True:
-            menu_choice = (input('What menu would you like to explore? '))
             print()
-            if menu_choice == '1':
-                self.actions_menu(self.get_current_hacker)
-            elif menu_choice == '2':
+            menu_choice = int(input('What menu would you like to explore? (5 for menu options) '))
+            print()
+            if menu_choice == 1:
+                self.actions_menu(self.get_current_hacker())
+            elif menu_choice == 2:
                 self.items_menu()
-            elif menu_choice == '3':
-                Hacker.Scan.found_rigs(self)
-            elif menu_choice == 'menu':
-                self.menu(self.get_current_hacker())
-            elif menu_choice == '4':
-                self.next_turn()
-                self.get_current_hacker()
-                print(f'**It is now {self.current_hacker.name}\'s turn | {self.available_action_points.available_points()} Action(s) Remaining**'
-                      f'\n{self.current_hacker}')
-            elif menu_choice == '10':
-                print('Thank you for playing!')
-                self.game_running = False
-            else:
-                print('Invalid choice')
+            elif menu_choice == 3:
+                Hacker.Scan().found_rigs(active_hacker)
+            elif menu_choice == 4:
+                print(f"--- {active_hacker.name}'s Inventory & Rig Storage ---")
+                print(active_hacker.inventory)
+                print(active_hacker.rig)
+                print("-" * 35)
+            elif menu_choice == 5:
+                print(self.menu_items)
+            elif menu_choice == 6:
+                print(Hacker.Hacker.format_item_display(self.current_hacker.name))
+                print(f'{self.current_hacker.name}\'s', (Hacker.Inventory()))
 
-    #TODO change so that encrypted status only shows when hacker is looking at storage or inventory
+            elif menu_choice == 9:
+                print(f'{active_hacker.name} is passing their turn.')
+                return
+            elif menu_choice == 10:
+                self.game_running = False
+
     def items_menu(self):
         print(*Items.load_items(),sep=', ')
-        item_input = input('Which item would you like information on? ').lower()
+        item_input = input('Which item would you like information on? ')
         found_item_name = None
 
         try:
@@ -110,38 +132,99 @@ class GameManager():
         except Exception:
             pass
 
-    #TODO potentially implement a way of only showing actions based on current inventory
     def actions_menu(self, active_hacker):
         actions_instance = Hacker.Actions()
         print(actions_instance.get_list_actions(),sep= ', ')
         print()
+        print(f'Current Success Chance: {self.current_hacker.trace_info.get_success_chance():.2f}%')
         action_menu_choice = input('What action will you take? ')
 
+
         if action_menu_choice == 'attack' or action_menu_choice == '1':
-
-            Hacker.Scan.found_hackers
-            attack_target = input('Who is your attack target?')
-
-            #TODO Print list of attack targets based on found rigs from scan, have user select rig to deal damage
             Hacker.Attack(active_hacker)
-        elif action_menu_choice == 'scan' or action_menu_choice == '2':
+            return
 
-            Hacker.Scan.rig_scanning(self)
+        elif action_menu_choice == 'scan' or action_menu_choice == '2':
+            Hacker.Scan(active_hacker, all_hackers)
+            return
+
+        elif action_menu_choice == 'encrypt' or action_menu_choice == '3':
+            Hacker.Encrypt(active_hacker)
+            return
+
+        elif action_menu_choice == 'decrypt' or action_menu_choice == '4':
+            Hacker.Decrypt(active_hacker)
+            return
+
+        elif action_menu_choice == 'lay low' or action_menu_choice == '5':
+            Hacker.LayLow(active_hacker)
+            return
+
+
+        elif action_menu_choice == 'exploit' or action_menu_choice == '6':
+            scanned_list = active_hacker.scanned_rigs
+            target_hacker = None
+            selection_complete = False
+
+            if not scanned_list:
+                print('Cannot extract: No rigs have been scanned yet.')
+                return
+
+            while not selection_complete:
+
+                Hacker.Scan().found_rigs(active_hacker)
+                extract_choice = input('Who will you extract from? (Enter number, "x" to cancel): ').lower().strip()
+                if extract_choice == 'x':
+                    print('Extraction cancelled.')
+                    return
+                else:
+                    try:
+                        target_index = int(extract_choice)
+                        if 1 <= target_index <= len(scanned_list):
+                            target_hacker = scanned_list[target_index - 1]
+                            selection_complete = True
+                        else:
+                            print(f'Invalid selection. Please choose a number between 1 and {len(scanned_list)}.')
+                    except ValueError:
+                        print('Invalid input. Please enter the number next to the target.')
+
+
+
+            if target_hacker:
+                Hacker.Exploit(active_hacker, target_hacker)
+
+                return
+
+        elif action_menu_choice == 'upgrade' or action_menu_choice == '7':
+            Hacker.Upgrade(active_hacker)
+            return
+
+        elif action_menu_choice == 'repair' or action_menu_choice == '8':
+            Hacker.Repair(active_hacker)
+            return
+
         else:
             print(f'Action {action_menu_choice} not found')
-        #TODO ensure that each hacker can only take one action per turn on completion
 
 
     def start_game(self):
 
         while self.game_running:
             active_hacker = self.get_current_hacker()
+            current_round = self.get_current_round()
+
+            if current_round > 1:
+                active_hacker.rig.generate_new_item()
 
             self.menu(active_hacker)
 
             if self.game_running:
-                self.next_turn()
 
+                if not hasattr(active_hacker, 'turns_taken'):
+                    active_hacker.turns_taken = 0
+                active_hacker.turns_taken += 1
+
+                self.next_turn()
 
 if __name__ == '__main__':
     game_info()
